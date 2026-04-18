@@ -1,0 +1,2769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Club Manager Pro — Mar del Plata Golf Club</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     TOKENS & RESET
+  ============================================================ */
+  :root {
+    --navy:    #0b1221;
+    --navy2:   #111c30;
+    --navy3:   #182440;
+    --gold:    #c9a96e;
+    --gold2:   #e8c98a;
+    --gold3:   #f5e4c0;
+    --cream:   #f5f0e8;
+    --white:   #ffffff;
+    --carbon:  #1a1a1a;
+    --muted:   #8a9ab8;
+    --success: #4caf81;
+    --warn:    #d48c30;
+    --danger:  #c04040;
+    --border:  rgba(201,169,110,0.18);
+    --border2: rgba(201,169,110,0.35);
+    --serif:   'Cormorant Garamond', Georgia, serif;
+    --sans:    'Jost', system-ui, sans-serif;
+    --radius:  14px;
+    --radius-lg: 22px;
+    --shadow:  0 8px 40px rgba(0,0,0,0.45);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--navy);
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ============================================================
+     APP SHELL
+  ============================================================ */
+  #app {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle background texture */
+  #app::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(201,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(11,18,33,0.8) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============================================================
+     HEADER — always visible
+  ============================================================ */
+  .app-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px 14px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(11,18,33,0.7);
+    backdrop-filter: blur(8px);
+    min-height: 72px;
+    flex-shrink: 0;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-emblem {
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-emblem svg { width: 26px; height: 26px; }
+
+  .logo-text { line-height: 1.2; }
+
+  .logo-name {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--gold2);
+    letter-spacing: 0.5px;
+  }
+
+  .logo-sub {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .clock {
+    text-align: right;
+    font-family: var(--serif);
+  }
+
+  .clock-time {
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--gold2);
+    letter-spacing: 1px;
+  }
+
+  .clock-date {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .manager-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .manager-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* ============================================================
+     SCREENS
+  ============================================================ */
+  .screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    z-index: 1;
+    padding: 0 28px 32px;
+  }
+
+  .screen.active { display: flex; animation: screenIn 0.35s ease; }
+
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================================
+     HOME SCREEN
+  ============================================================ */
+  #screen-home {
+    padding-top: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .home-hero {
+    text-align: center;
+    padding: 40px 0 36px;
+    width: 100%;
+  }
+
+  .home-emblem {
+    width: 88px;
+    height: 88px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+
+  .home-emblem::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid rgba(201,169,110,0.3);
+    border-radius: 50%;
+  }
+
+  .home-emblem svg { width: 46px; height: 46px; }
+
+  .home-title {
+    font-family: var(--serif);
+    font-size: 34px;
+    font-weight: 300;
+    color: var(--cream);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .home-title em {
+    font-style: italic;
+    color: var(--gold2);
+  }
+
+  .home-divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 16px auto;
+  }
+
+  .home-sub {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* Main option cards */
+  .home-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 820px;
+    padding: 0 0 20px;
+  }
+
+  .option-card {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 20px 28px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    min-height: 210px;
+    justify-content: center;
+  }
+
+  .option-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .option-card.gold-accent::before {
+    background: radial-gradient(circle at 50% 0%, rgba(201,169,110,0.12), transparent 70%);
+  }
+
+  .option-card.blue-accent::before {
+    background: radial-gradient(circle at 50% 0%, rgba(50,100,200,0.12), transparent 70%);
+  }
+
+  .option-card.teal-accent::before {
+    background: radial-gradient(circle at 50% 0%, rgba(40,160,120,0.10), transparent 70%);
+  }
+
+  .option-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+
+  .option-card:hover::before { opacity: 1; }
+
+  .option-card:active { transform: translateY(0); }
+
+  .option-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+  }
+
+  .icon-gold { background: rgba(201,169,110,0.12); border: 1px solid rgba(201,169,110,0.3); }
+  .icon-blue { background: rgba(50,100,200,0.12); border: 1px solid rgba(50,100,200,0.3); }
+  .icon-teal { background: rgba(40,160,120,0.12); border: 1px solid rgba(40,160,120,0.3); }
+
+  .option-icon svg { width: 28px; height: 28px; }
+
+  .option-label {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--cream);
+    letter-spacing: 0.5px;
+  }
+
+  .option-desc {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .option-arrow {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 4px;
+    transition: all 0.3s;
+  }
+
+  .option-card:hover .option-arrow {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.1);
+  }
+
+  /* ============================================================
+     INNER SCREENS — shared layout
+  ============================================================ */
+  .screen-header {
+    width: 100%;
+    max-width: 640px;
+    padding: 28px 0 20px;
+    text-align: center;
+  }
+
+  .screen-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .screen-title {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--cream);
+    letter-spacing: 0.5px;
+  }
+
+  .screen-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .divider-gold {
+    width: 50px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 14px auto;
+  }
+
+  /* Back button */
+  .back-btn {
+    position: absolute;
+    top: 18px;
+    left: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s;
+    z-index: 5;
+  }
+
+  .back-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ============================================================
+     DNI KEYPAD
+  ============================================================ */
+  .keypad-wrap {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .dni-display {
+    width: 100%;
+    background: var(--navy3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    text-align: center;
+    position: relative;
+  }
+
+  .dni-label-sm {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .dni-value {
+    font-family: var(--serif);
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--gold2);
+    letter-spacing: 6px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .dni-cursor {
+    width: 2px;
+    height: 36px;
+    background: var(--gold);
+    animation: blink 1s infinite;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .keypad-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  .key-btn {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 12px;
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--cream);
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+
+  .key-btn:hover { background: var(--navy3); border-color: var(--border2); }
+  .key-btn:active { transform: scale(0.96); background: rgba(201,169,110,0.1); }
+
+  .key-btn.key-del {
+    font-size: 18px;
+    color: var(--muted);
+  }
+
+  .key-btn.key-ok {
+    background: var(--gold);
+    color: var(--navy);
+    border-color: var(--gold);
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .key-btn.key-ok:hover { background: var(--gold2); }
+
+  /* ============================================================
+     SOCIO PROFILE
+  ============================================================ */
+  .profile-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, var(--navy3), var(--navy2));
+    padding: 28px 28px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .profile-avatar {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: rgba(201,169,110,0.12);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--gold2);
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .profile-info { flex: 1; }
+
+  .profile-name {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    color: var(--cream);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .profile-matricula {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .stat-item {
+    padding: 18px 20px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 300;
+  }
+
+  .stat-value {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--cream);
+  }
+
+  .stat-value.ok { color: var(--success); }
+  .stat-value.warn { color: var(--warn); }
+
+  /* Profile action buttons */
+  .profile-actions {
+    width: 100%;
+    max-width: 560px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .action-card {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.25s;
+  }
+
+  .action-card:hover {
+    border-color: var(--border2);
+    background: var(--navy3);
+    transform: translateY(-2px);
+  }
+
+  .action-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ac-gold { background: rgba(201,169,110,0.12); }
+  .ac-blue { background: rgba(50,100,200,0.12); }
+
+  .action-card-text { flex: 1; }
+
+  .ac-title {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--cream);
+    margin-bottom: 2px;
+  }
+
+  .ac-sub {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ============================================================
+     SECRETARÍA MENU
+  ============================================================ */
+  .sec-menu {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sec-item {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.25s;
+  }
+
+  .sec-item:hover {
+    border-color: var(--border2);
+    background: var(--navy3);
+  }
+
+  .sec-item-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sec-item-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(201,169,110,0.08);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sec-item-label {
+    font-family: var(--serif);
+    font-size: 19px;
+    color: var(--cream);
+    margin-bottom: 2px;
+  }
+
+  .sec-item-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ============================================================
+     GREEN FEE
+  ============================================================ */
+  .choice-grid {
+    width: 100%;
+    max-width: 560px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .choice-grid.cols2 { grid-template-columns: 1fr 1fr; }
+  .choice-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+
+  .choice-btn {
+    background: var(--navy2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.25s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .choice-btn:hover, .choice-btn.selected {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.07);
+  }
+
+  .choice-btn.selected {
+    box-shadow: 0 0 0 1px var(--gold);
+  }
+
+  .choice-label {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--cream);
+  }
+
+  .choice-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* Tee colors */
+  .tee-red { border-color: rgba(200,50,50,0.4); }
+  .tee-red:hover, .tee-red.selected { border-color: #e05050; background: rgba(200,50,50,0.07); }
+  .tee-yellow { border-color: rgba(220,180,40,0.4); }
+  .tee-yellow:hover, .tee-yellow.selected { border-color: #ddc040; background: rgba(220,180,40,0.07); }
+  .tee-blue { border-color: rgba(40,100,220,0.4); }
+  .tee-blue:hover, .tee-blue.selected { border-color: #4070e0; background: rgba(40,100,220,0.07); }
+
+  .tee-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    margin: 0 auto 4px;
+  }
+
+  /* Handicap result */
+  .handicap-result {
+    width: 100%;
+    max-width: 560px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .hcp-calc-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .hcp-calc-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+
+  .hcp-number {
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--gold2);
+  }
+
+  /* ============================================================
+     ESTADO DE CUENTA
+  ============================================================ */
+  .cuenta-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .cuenta-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cuenta-row {
+    padding: 16px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .cuenta-row:last-child { border-bottom: none; }
+  .cuenta-key { color: var(--muted); font-weight: 300; }
+  .cuenta-val { color: var(--cream); font-weight: 500; }
+  .cuenta-val.positive { color: var(--success); }
+  .cuenta-val.negative { color: var(--danger); }
+
+  /* ============================================================
+     PAGO CUOTA
+  ============================================================ */
+  .pago-total-box {
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+    padding: 28px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+  }
+
+  .pago-amount {
+    font-family: var(--serif);
+    font-size: 52px;
+    font-weight: 300;
+    color: var(--cream);
+    margin: 8px 0;
+  }
+
+  .pago-concept {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .pago-methods {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .pago-method-btn {
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.25s;
+    font-family: var(--sans);
+    color: var(--cream);
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .pago-method-btn:hover { border-color: var(--gold); background: rgba(201,169,110,0.06); }
+
+  .pago-method-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(201,169,110,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ============================================================
+     CARGAR TARJETA
+  ============================================================ */
+  .scan-box {
+    width: 100%;
+    max-width: 480px;
+    background: var(--navy2);
+    border: 2px dashed var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .scan-box:hover { border-color: var(--gold); background: rgba(201,169,110,0.04); }
+
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: scanLine 2.5s ease-in-out infinite;
+    opacity: 0.6;
+  }
+
+  @keyframes scanLine {
+    0%   { top: 20%; }
+    50%  { top: 80%; }
+    100% { top: 20%; }
+  }
+
+  .scan-icon { margin: 0 auto 16px; }
+
+  .scan-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .scan-sub { font-size: 12px; color: var(--muted); line-height: 1.6; font-weight: 300; }
+
+  /* Score grid */
+  .score-grid-wrap {
+    width: 100%;
+    max-width: 640px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .score-grid-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .score-grid-title {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--cream);
+  }
+
+  .score-grid-note {
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .score-table {
+    width: 100%;
+    border-collapse: collapse;
+    padding: 12px;
+    display: block;
+  }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 80px repeat(9, 1fr);
+    gap: 4px;
+    padding: 4px 12px;
+  }
+
+  .score-row.header { padding-top: 12px; }
+
+  .score-cell {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--cream);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s;
+    border: 1px solid transparent;
+    position: relative;
+  }
+
+  .score-cell.header-cell {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    cursor: default;
+    font-weight: 300;
+  }
+
+  .score-cell.row-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    justify-content: flex-start;
+    padding-left: 4px;
+    cursor: default;
+    font-weight: 300;
+  }
+
+  .score-cell.editable {
+    background: var(--navy3);
+    border-color: var(--border);
+  }
+
+  .score-cell.editable:hover {
+    border-color: var(--gold);
+    background: rgba(201,169,110,0.08);
+  }
+
+  .score-cell.editing {
+    border-color: var(--warn);
+    background: rgba(212,140,48,0.1);
+    color: var(--warn);
+  }
+
+  .score-cell.par-cell {
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: default;
+  }
+
+  .score-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    margin: 4px 12px 12px;
+    border-radius: 10px;
+    background: rgba(201,169,110,0.05);
+  }
+
+  .score-total-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .score-total-value { font-family: var(--serif); font-size: 24px; color: var(--gold2); }
+
+  /* OCR mini keypad */
+  .mini-keypad-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 40px;
+  }
+
+  .mini-keypad-overlay.open { display: flex; animation: fadeUp 0.25s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .mini-keypad {
+    background: var(--navy2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    width: 280px;
+  }
+
+  .mini-keypad-title {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .mini-keypad-display {
+    font-family: var(--serif);
+    font-size: 40px;
+    text-align: center;
+    color: var(--gold2);
+    margin-bottom: 14px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .mini-key {
+    background: var(--navy3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--cream);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+  }
+
+  .mini-key:hover { background: rgba(201,169,110,0.1); border-color: var(--border2); }
+
+  .mini-key.ok-key {
+    background: var(--gold);
+    color: var(--navy);
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .mini-key.cancel-key {
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* Sync status steps */
+  .sync-steps {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .sync-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all 0.4s;
+  }
+
+  .sync-step.done { border-color: rgba(76,175,129,0.4); background: rgba(76,175,129,0.05); }
+  .sync-step.active { border-color: var(--gold); background: rgba(201,169,110,0.05); }
+
+  .sync-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: all 0.4s;
+  }
+
+  .sync-step.done .sync-dot { background: var(--success); }
+  .sync-step.active .sync-dot { background: var(--gold); box-shadow: 0 0 8px rgba(201,169,110,0.5); animation: pulseDot 1s infinite; }
+
+  @keyframes pulseDot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .sync-step-label { font-size: 13px; color: var(--muted); flex: 1; font-weight: 300; }
+  .sync-step.done .sync-step-label { color: var(--success); }
+  .sync-step.active .sync-step-label { color: var(--gold2); }
+
+  .sync-check { font-size: 14px; color: var(--success); }
+
+  /* ============================================================
+     SUCCESS SCREEN
+  ============================================================ */
+  .success-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-align: center;
+    padding: 40px 28px;
+    gap: 16px;
+  }
+
+  .success-ring {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: ringIn 0.5s ease;
+  }
+
+  @keyframes ringIn {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .success-title {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--cream);
+  }
+
+  .success-detail {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+    max-width: 360px;
+  }
+
+  .badge-sync {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(76,175,129,0.1);
+    border: 1px solid rgba(76,175,129,0.3);
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--success);
+  }
+
+  /* ============================================================
+     INVITADOS
+  ============================================================ */
+  .form-field {
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 14px;
+  }
+
+  .field-label {
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .field-value {
+    width: 100%;
+    background: var(--navy2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--cream);
+    letter-spacing: 1px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+
+  .field-value:hover { border-color: var(--border2); }
+  .field-value.active { border-color: var(--gold); }
+
+  /* ============================================================
+     DASHBOARD GERENCIAL
+  ============================================================ */
+  #screen-dashboard {
+    background: var(--carbon);
+    padding: 20px 24px 32px;
+    gap: 16px;
+  }
+
+  .dash-top {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .dash-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--cream);
+    font-weight: 300;
+  }
+
+  .dash-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--success);
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulseDot 1.5s infinite;
+  }
+
+  .dash-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .dash-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+  .dash-grid.cols2 { grid-template-columns: repeat(2, 1fr); }
+
+  .dash-metric {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+
+  .dm-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 8px;
+  }
+
+  .dm-value {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .dm-delta {
+    font-size: 10px;
+    color: var(--success);
+  }
+
+  .dm-delta.warn { color: var(--warn); }
+  .dm-delta.muted { color: rgba(255,255,255,0.3); }
+
+  .dash-section-title {
+    width: 100%;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .alert-item {
+    background: rgba(212,140,48,0.08);
+    border: 1px solid rgba(212,140,48,0.2);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--warn);
+  }
+
+  .alert-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+
+  .system-status {
+    width: 100%;
+    background: rgba(76,175,129,0.06);
+    border: 1px solid rgba(76,175,129,0.2);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .sys-label { color: rgba(255,255,255,0.4); }
+  .sys-value { color: var(--success); font-weight: 500; }
+
+  /* ============================================================
+     PRIMARY BUTTON
+  ============================================================ */
+  .btn-primary {
+    width: 100%;
+    max-width: 480px;
+    padding: 18px;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-top: 4px;
+  }
+
+  .btn-primary:hover { background: var(--gold2); }
+  .btn-primary:active { transform: scale(0.99); }
+
+  .btn-secondary {
+    width: 100%;
+    max-width: 480px;
+    padding: 16px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-top: 8px;
+  }
+
+  .btn-secondary:hover { border-color: var(--border2); color: var(--cream); }
+
+  /* Invitados form nav */
+  .field-nav {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .field-nav-btn {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+    border-right: 1px solid var(--border);
+  }
+
+  .field-nav-btn:last-child { border-right: none; }
+  .field-nav-btn.active { background: rgba(201,169,110,0.1); color: var(--gold); }
+
+  /* Progress bar */
+  .progress-bar {
+    width: 100%;
+    max-width: 480px;
+    height: 3px;
+    background: var(--navy3);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  /* Utility */
+  .gap-8 { gap: 8px; }
+  .mt-12 { margin-top: 12px; }
+  .mt-20 { margin-top: 20px; }
+  .full-w { width: 100%; max-width: 560px; }
+  .text-center { text-align: center; }
+  .text-gold { color: var(--gold2); }
+  .text-muted { color: var(--muted); font-size: 12px; font-weight: 300; }
+
+  /* Scrollbar */
+  .screen::-webkit-scrollbar { width: 4px; }
+  .screen::-webkit-scrollbar-track { background: transparent; }
+  .screen::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Responsive tweaks for smaller totems */
+  @media (max-width: 600px) {
+    .home-options { grid-template-columns: 1fr; max-width: 380px; }
+    .profile-stats { grid-template-columns: 1fr 1fr; }
+    .dash-grid { grid-template-columns: repeat(2, 1fr); }
+    .score-row { grid-template-columns: 60px repeat(9, 1fr); gap: 2px; }
+    .home-title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================================================ HEADER -->
+  <header class="app-header">
+    <div class="header-logo">
+      <div class="logo-emblem">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="20" cy="20" r="18" stroke="#c9a96e" stroke-width="1.2"/>
+          <path d="M10 28 Q15 14 20 18 Q25 22 30 10" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <circle cx="30" cy="10" r="2.5" fill="#c9a96e"/>
+          <path d="M30 10 L30 28" stroke="#c9a96e" stroke-width="1" stroke-dasharray="2,2"/>
+          <path d="M27 28 L33 28" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="logo-name">Mar del Plata Golf Club</div>
+        <div class="logo-sub">Desde 1898 · La Catedral del Golf</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="clock">
+        <div class="clock-time" id="clockTime">--:--</div>
+        <div class="clock-date" id="clockDate">---</div>
+      </div>
+      <button class="manager-btn" onclick="go('dashboard')">Panel Gerencial</button>
+    </div>
+  </header>
+
+  <!-- ================================================ SCREENS -->
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero">
+      <div class="home-emblem">
+        <svg viewBox="0 0 60 60" fill="none">
+          <path d="M15 44 Q22 20 30 26 Q38 32 45 12" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <circle cx="45" cy="12" r="3.5" fill="#c9a96e"/>
+          <path d="M45 12 L45 44" stroke="#c9a96e" stroke-width="1.2" stroke-dasharray="3,3"/>
+          <path d="M41 44 L49 44" stroke="#c9a96e" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="home-title">Club Manager <em>Pro</em></div>
+      <div class="home-divider"></div>
+      <div class="home-sub">Seleccioná una opción para continuar</div>
+    </div>
+
+    <div class="home-options">
+      <div class="option-card gold-accent" onclick="go('socio-dni')">
+        <div class="option-icon icon-gold">
+          <svg viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="10" r="4.5" stroke="#c9a96e" stroke-width="1.5"/>
+            <path d="M6 24c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="option-label">Socios</div>
+        <div class="option-desc">Check-in, green fee,<br>Golfistics y servicios</div>
+        <div class="option-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7h8M8 4l3 3-3 3" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="option-card blue-accent" onclick="go('invitado')">
+        <div class="option-icon icon-blue">
+          <svg viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="10" r="4.5" stroke="#6496e0" stroke-width="1.5"/>
+            <path d="M6 24c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#6496e0" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M20 8l2 2-2 2" stroke="#6496e0" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="option-label">Invitados</div>
+        <div class="option-desc">Registro, green fee<br>y cobro en el momento</div>
+        <div class="option-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7h8M8 4l3 3-3 3" stroke="#6496e0" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="option-card teal-accent" onclick="go('cargar-tarjeta')">
+        <div class="option-icon icon-teal">
+          <svg viewBox="0 0 28 28" fill="none">
+            <rect x="5" y="8" width="18" height="12" rx="2" stroke="#40a080" stroke-width="1.5"/>
+            <path d="M9 13h10M9 16h6" stroke="#40a080" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M19 4l2 4" stroke="#40a080" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="option-label">Cargar Tarjeta</div>
+        <div class="option-desc">Registrá los puntajes<br>al terminar tu ronda</div>
+        <div class="option-arrow">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7h8M8 4l3 3-3 3" stroke="#40a080" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIO: INGRESO DNI -->
+  <div class="screen" id="screen-socio-dni">
+    <button class="back-btn" onclick="go('home')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Acceso de socios</div>
+      <div class="screen-title">Ingresá tu DNI</div>
+      <div class="divider-gold"></div>
+      <div class="screen-sub">Usá el teclado para ingresar tu número</div>
+    </div>
+    <div class="keypad-wrap">
+      <div class="dni-display">
+        <div class="dni-label-sm">Número de DNI</div>
+        <div class="dni-value" id="dniDisplay">
+          <span id="dniText"></span>
+          <div class="dni-cursor"></div>
+        </div>
+      </div>
+      <div class="keypad-grid">
+        <button class="key-btn" onclick="dniKey('1')">1</button>
+        <button class="key-btn" onclick="dniKey('2')">2</button>
+        <button class="key-btn" onclick="dniKey('3')">3</button>
+        <button class="key-btn" onclick="dniKey('4')">4</button>
+        <button class="key-btn" onclick="dniKey('5')">5</button>
+        <button class="key-btn" onclick="dniKey('6')">6</button>
+        <button class="key-btn" onclick="dniKey('7')">7</button>
+        <button class="key-btn" onclick="dniKey('8')">8</button>
+        <button class="key-btn" onclick="dniKey('9')">9</button>
+        <button class="key-btn key-del" onclick="dniKey('del')">⌫</button>
+        <button class="key-btn" onclick="dniKey('0')">0</button>
+        <button class="key-btn key-ok" onclick="dniKey('ok')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIO: PERFIL -->
+  <div class="screen" id="screen-socio-perfil">
+    <button class="back-btn" onclick="go('socio-dni')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Bienvenido de vuelta</div>
+      <div class="screen-title" id="profileGreeting">Hola, Roberto</div>
+      <div class="divider-gold"></div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar" id="profileAvatar">RC</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">Roberto Castillo</div>
+          <div class="profile-matricula" id="profileMatricula">Matrícula #4821 · Socio Activo</div>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-label">Handicap Index</div>
+          <div class="stat-value" id="profileHcp">12.4</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Cuota</div>
+          <div class="stat-value ok" id="profileCuota">Al día</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Rondas 2026</div>
+          <div class="stat-value" id="profileRondas">28</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <div class="action-card" onclick="openGolfistics()">
+        <div class="action-card-icon ac-gold">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="8" r="3.5" stroke="#c9a96e" stroke-width="1.3"/>
+            <path d="M4 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#c9a96e" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="action-card-text">
+          <div class="ac-title">Golfistics</div>
+          <div class="ac-sub">Reservas, torneos, stats</div>
+        </div>
+      </div>
+      <div class="action-card" onclick="go('secretaria')">
+        <div class="action-card-icon ac-blue">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="3" y="5" width="16" height="12" rx="2" stroke="#6496e0" stroke-width="1.3"/>
+            <path d="M7 9h8M7 13h5" stroke="#6496e0" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="action-card-text">
+          <div class="ac-title">Secretaría</div>
+          <div class="ac-sub">Green fee, cuenta, cuota</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECRETARÍA MENU -->
+  <div class="screen" id="screen-secretaria">
+    <button class="back-btn" onclick="go('socio-perfil')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Servicios del club</div>
+      <div class="screen-title">Secretaría</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="sec-menu">
+      <div class="sec-item" onclick="go('green-fee')">
+        <div class="sec-item-left">
+          <div class="sec-item-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <circle cx="16" cy="6" r="2.5" fill="#c9a96e"/>
+              <path d="M16 6 L16 18" stroke="#c9a96e" stroke-width="1" stroke-dasharray="2,2"/>
+              <path d="M13 18 L19 18" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M4 18 Q8 8 12 12" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="sec-item-label">Sacar Green Fee</div>
+            <div class="sec-item-sub">Habilitación de cancha y tarjeta</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M5 8h6M8 5l3 3-3 3" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="sec-item" onclick="go('estado-cuenta')">
+        <div class="sec-item-left">
+          <div class="sec-item-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect x="3" y="5" width="16" height="12" rx="2" stroke="#c9a96e" stroke-width="1.3"/>
+              <path d="M7 9h8M7 13h5" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="sec-item-label">Ver Estado de Cuenta</div>
+            <div class="sec-item-sub">Saldo, consumos y vencimientos</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M5 8h6M8 5l3 3-3 3" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="sec-item" onclick="go('pagar-cuota')">
+        <div class="sec-item-left">
+          <div class="sec-item-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <rect x="3" y="7" width="16" height="10" rx="1.5" stroke="#c9a96e" stroke-width="1.3"/>
+              <path d="M3 11h16" stroke="#c9a96e" stroke-width="1.2"/>
+              <path d="M7 14h2" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M7 5h8" stroke="#c9a96e" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="sec-item-label">Pagar Cuota</div>
+            <div class="sec-item-sub">QR o terminal de cobro</div>
+          </div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M5 8h6M8 5l3 3-3 3" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- GREEN FEE: TORNEO O LIBRE -->
+  <div class="screen" id="screen-green-fee">
+    <button class="back-btn" onclick="go('secretaria')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Green Fee</div>
+      <div class="screen-title">¿Jugás en torneo?</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="choice-grid cols2" style="max-width:480px">
+      <div class="choice-btn" onclick="gfTorneo(true)">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+          <circle cx="15" cy="10" r="5" stroke="#c9a96e" stroke-width="1.4"/>
+          <path d="M8 24h14" stroke="#c9a96e" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M15 15v9" stroke="#c9a96e" stroke-width="1.2" stroke-dasharray="2,2"/>
+        </svg>
+        <div class="choice-label">Sí, torneo</div>
+        <div class="choice-sub">Formato del día</div>
+      </div>
+      <div class="choice-btn" onclick="gfTorneo(false)">
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+          <circle cx="21" cy="8" r="3" fill="#c9a96e"/>
+          <path d="M21 8 L21 22" stroke="#c9a96e" stroke-width="1" stroke-dasharray="2,2"/>
+          <path d="M18 22 L24 22" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M6 22 Q10 12 15 16" stroke="#c9a96e" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="choice-label">Vuelta libre</div>
+        <div class="choice-sub">Sin competencia</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GREEN FEE: TORNEO INFO -->
+  <div class="screen" id="screen-gf-torneo">
+    <button class="back-btn" onclick="go('green-fee')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Torneo del día</div>
+      <div class="screen-title">Copa Otoño 2026</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="profile-card" style="max-width:520px">
+      <div class="profile-header" style="flex-direction:column;align-items:flex-start;gap:10px">
+        <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold)">Formato</div>
+        <div style="font-family:var(--serif);font-size:22px;color:var(--cream)">Stableford · 18 hoyos</div>
+      </div>
+      <div class="profile-stats" style="grid-template-columns:1fr 1fr">
+        <div class="stat-item"><div class="stat-label">Participantes</div><div class="stat-value">42</div></div>
+        <div class="stat-item"><div class="stat-label">Categorías</div><div class="stat-value">3</div></div>
+        <div class="stat-item"><div class="stat-label">Cancha</div><div class="stat-value" style="font-size:16px">Vieja</div></div>
+        <div class="stat-item"><div class="stat-label">Inscripción</div><div class="stat-value text-gold" style="font-size:16px">$15.000</div></div>
+      </div>
+    </div>
+    <div style="width:100%;max-width:520px;margin-bottom:16px">
+      <div class="screen-eyebrow" style="margin-bottom:12px;text-align:left">Elegí tu tee</div>
+      <div class="choice-grid cols3">
+        <div class="choice-btn tee-red" onclick="selectTee('rojo',this)">
+          <div class="tee-dot" style="background:#e05050"></div>
+          <div class="choice-label" style="font-size:16px">Rojo</div>
+          <div class="choice-sub">Damas</div>
+        </div>
+        <div class="choice-btn tee-yellow" onclick="selectTee('amarillo',this)">
+          <div class="tee-dot" style="background:#ddc040"></div>
+          <div class="choice-label" style="font-size:16px">Amarillo</div>
+          <div class="choice-sub">Caballeros</div>
+        </div>
+        <div class="choice-btn tee-blue" onclick="selectTee('azul',this)">
+          <div class="tee-dot" style="background:#4070e0"></div>
+          <div class="choice-label" style="font-size:16px">Azul</div>
+          <div class="choice-sub">Scratch</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnGfTorneoOk" onclick="go('gf-handicap')" style="opacity:0.4;pointer-events:none;max-width:520px">Continuar</button>
+  </div>
+
+  <!-- GREEN FEE: HOYOS LIBRE -->
+  <div class="screen" id="screen-gf-libre">
+    <button class="back-btn" onclick="go('green-fee')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Vuelta libre</div>
+      <div class="screen-title">¿Cuántos hoyos?</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="choice-grid cols3" style="max-width:520px">
+      <div class="choice-btn" onclick="selectHoyos(9,this)">
+        <div class="choice-label">9</div>
+        <div class="choice-sub">Hoyos</div>
+      </div>
+      <div class="choice-btn" onclick="selectHoyos(18,this)">
+        <div class="choice-label">18</div>
+        <div class="choice-sub">Hoyos</div>
+      </div>
+      <div class="choice-btn" onclick="selectHoyos(36,this)">
+        <div class="choice-label">36</div>
+        <div class="choice-sub">Hoyos</div>
+      </div>
+    </div>
+    <div style="width:100%;max-width:520px;margin-top:20px;margin-bottom:16px">
+      <div class="screen-eyebrow" style="margin-bottom:12px;text-align:left">Elegí tu tee</div>
+      <div class="choice-grid cols3">
+        <div class="choice-btn tee-red" onclick="selectTee('rojo',this)">
+          <div class="tee-dot" style="background:#e05050"></div>
+          <div class="choice-label" style="font-size:16px">Rojo</div>
+          <div class="choice-sub">Damas</div>
+        </div>
+        <div class="choice-btn tee-yellow" onclick="selectTee('amarillo',this)">
+          <div class="tee-dot" style="background:#ddc040"></div>
+          <div class="choice-label" style="font-size:16px">Amarillo</div>
+          <div class="choice-sub">Caballeros</div>
+        </div>
+        <div class="choice-btn tee-blue" onclick="selectTee('azul',this)">
+          <div class="tee-dot" style="background:#4070e0"></div>
+          <div class="choice-label" style="font-size:16px">Azul</div>
+          <div class="choice-sub">Scratch</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnGfLibreOk" onclick="go('gf-handicap')" style="opacity:0.4;pointer-events:none;max-width:520px">Continuar</button>
+  </div>
+
+  <!-- GREEN FEE: HANDICAP Y PAGO -->
+  <div class="screen" id="screen-gf-handicap">
+    <button class="back-btn" onclick="history.back()">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Cálculo de handicap</div>
+      <div class="screen-title">Tu tarjeta de juego</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="handicap-result">
+      <div class="hcp-calc-label">Handicap de juego calculado</div>
+      <div class="hcp-calc-row">
+        <span>HCP Index <strong id="hcpIndex" class="text-gold">12.4</strong></span>
+        <span>×</span>
+        <span>Slope <strong id="hcpSlope" class="text-gold">113</strong></span>
+        <span>÷ 113</span>
+      </div>
+      <div class="hcp-number" id="hcpResult">12</div>
+      <div class="text-muted mt-12">Tee <span id="hcpTee" class="text-gold">Amarillo</span> · <span id="hcpHoyos">18</span> hoyos</div>
+    </div>
+
+    <div class="pago-total-box">
+      <div class="pago-concept">Green Fee</div>
+      <div class="pago-amount" id="gfAmount">$8.500</div>
+      <div class="text-muted">Incluye tarjeta impresa y habilitación</div>
+    </div>
+
+    <div class="pago-methods">
+      <div class="pago-method-btn" onclick="go('gf-success')">
+        <div class="pago-method-icon">📱</div>
+        <div>
+          <div style="font-weight:500">Pagar con QR</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Mercado Pago · Modo · Cualquier billetera</div>
+        </div>
+      </div>
+      <div class="pago-method-btn" onclick="go('gf-success')">
+        <div class="pago-method-icon">💳</div>
+        <div>
+          <div style="font-weight:500">Terminal de cobro</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Débito · Crédito · Contactless</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GREEN FEE: ÉXITO -->
+  <div class="screen" id="screen-gf-success">
+    <div class="success-wrap">
+      <div class="success-ring">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <polyline points="10,20 17,27 28,12" stroke="#4caf81" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">¡Listo para jugar!</div>
+      <div class="badge-sync">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--success)"></div>
+        Tarjeta impresa
+      </div>
+      <div class="success-detail" id="gfSuccessDetail">
+        Roberto Castillo · Tee Amarillo · 18 hoyos<br>
+        Handicap de juego: 12 · Stableford<br>
+        Pago acreditado automáticamente
+      </div>
+      <button class="btn-primary" onclick="go('home')" style="max-width:320px">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- ESTADO DE CUENTA -->
+  <div class="screen" id="screen-estado-cuenta">
+    <button class="back-btn" onclick="go('secretaria')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Secretaría</div>
+      <div class="screen-title">Estado de Cuenta</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="cuenta-card">
+      <div class="cuenta-header">
+        <div>
+          <div style="font-family:var(--serif);font-size:18px;color:var(--cream)" id="cuentaSocio">Roberto Castillo</div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px">Matrícula #4821</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Saldo</div>
+          <div style="font-family:var(--serif);font-size:24px;color:var(--success)">$0</div>
+        </div>
+      </div>
+      <div class="cuenta-row"><span class="cuenta-key">Cuota mensual</span><span class="cuenta-val positive">Pagada · Abril 2026</span></div>
+      <div class="cuenta-row"><span class="cuenta-key">Próximo vencimiento</span><span class="cuenta-val">01 Mayo 2026</span></div>
+      <div class="cuenta-row"><span class="cuenta-key">Consumos restaurante</span><span class="cuenta-val">$12.400</span></div>
+      <div class="cuenta-row"><span class="cuenta-key">Green fees mes</span><span class="cuenta-val">$25.500</span></div>
+      <div class="cuenta-row"><span class="cuenta-key">Torneos inscriptos</span><span class="cuenta-val">2</span></div>
+      <div class="cuenta-row"><span class="cuenta-key">Crédito disponible</span><span class="cuenta-val positive">$15.000</span></div>
+    </div>
+    <button class="btn-secondary" onclick="go('secretaria')">Volver a secretaría</button>
+  </div>
+
+  <!-- PAGAR CUOTA -->
+  <div class="screen" id="screen-pagar-cuota">
+    <button class="back-btn" onclick="go('secretaria')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Secretaría</div>
+      <div class="screen-title">Pagar Cuota</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="pago-total-box">
+      <div class="pago-concept">Cuota mensual · Abril 2026</div>
+      <div class="pago-amount">$85.000</div>
+      <div class="text-muted">Socio Activo · Matrícula #4821</div>
+    </div>
+    <div class="pago-methods">
+      <div class="pago-method-btn" onclick="go('cuota-success')">
+        <div class="pago-method-icon">📱</div>
+        <div>
+          <div style="font-weight:500">Pagar con QR</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Mercado Pago · Modo · Cualquier billetera</div>
+        </div>
+      </div>
+      <div class="pago-method-btn" onclick="go('cuota-success')">
+        <div class="pago-method-icon">💳</div>
+        <div>
+          <div style="font-weight:500">Terminal de cobro</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Débito · Crédito · Contactless</div>
+        </div>
+      </div>
+      <div class="pago-method-btn" onclick="go('cuota-success')">
+        <div class="pago-method-icon">🏦</div>
+        <div>
+          <div style="font-weight:500">Débito automático CBU</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Adherite para cobros futuros sin pasar por el tótem</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUOTA: ÉXITO -->
+  <div class="screen" id="screen-cuota-success">
+    <div class="success-wrap">
+      <div class="success-ring">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <polyline points="10,20 17,27 28,12" stroke="#4caf81" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">Cuota pagada</div>
+      <div class="badge-sync">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--success)"></div>
+        Acreditado en sistema
+      </div>
+      <div class="success-detail">
+        Abril 2026 · $85.000<br>
+        Comprobante enviado al email registrado<br>
+        Ya podés acceder a todos los servicios
+      </div>
+      <button class="btn-primary" onclick="go('home')" style="max-width:320px">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- INVITADOS -->
+  <div class="screen" id="screen-invitado">
+    <button class="back-btn" onclick="go('home')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Acceso de invitados</div>
+      <div class="screen-title">Registro</div>
+      <div class="divider-gold"></div>
+      <div class="screen-sub">Completá tus datos para continuar</div>
+    </div>
+
+    <div class="field-nav">
+      <button class="field-nav-btn active" id="invNombreTab" onclick="invTab('nombre')">Nombre</button>
+      <button class="field-nav-btn" id="invDniTab" onclick="invTab('dni')">DNI</button>
+    </div>
+
+    <div class="form-field" id="invNombreField">
+      <span class="field-label">Nombre completo</span>
+      <div class="field-value" id="invNombreDisplay" onclick="invTeclado('nombre')">Carlos Méndez</div>
+    </div>
+    <div class="form-field" id="invDniField" style="display:none">
+      <span class="field-label">Número de DNI</span>
+      <div class="field-value" id="invDniDisplay" onclick="invTeclado('dni')">28.441.903</div>
+    </div>
+
+    <div class="choice-grid cols2 mt-20" style="max-width:480px">
+      <div class="choice-btn" onclick="selectHoyosInv(9,this)">
+        <div class="choice-label">9 hoyos</div>
+        <div class="choice-sub">$6.000</div>
+      </div>
+      <div class="choice-btn" onclick="selectHoyosInv(18,this)">
+        <div class="choice-label">18 hoyos</div>
+        <div class="choice-sub">$12.000</div>
+      </div>
+    </div>
+
+    <button class="btn-primary mt-20" onclick="go('invitado-pago')">Continuar al pago</button>
+  </div>
+
+  <!-- INVITADO: PAGO -->
+  <div class="screen" id="screen-invitado-pago">
+    <button class="back-btn" onclick="go('invitado')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Invitado</div>
+      <div class="screen-title">Abonar ingreso</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="pago-total-box">
+      <div class="pago-concept">Arancel de visita · 18 hoyos</div>
+      <div class="pago-amount">$12.000</div>
+      <div class="text-muted">Carlos Méndez · DNI 28.441.903</div>
+    </div>
+    <div class="pago-methods">
+      <div class="pago-method-btn" onclick="go('invitado-success')">
+        <div class="pago-method-icon">📱</div>
+        <div>
+          <div style="font-weight:500">Pagar con QR</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Mercado Pago · Modo · Cualquier billetera</div>
+        </div>
+      </div>
+      <div class="pago-method-btn" onclick="go('invitado-success')">
+        <div class="pago-method-icon">💳</div>
+        <div>
+          <div style="font-weight:500">Terminal de cobro</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Débito · Crédito · Contactless</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVITADO: ÉXITO -->
+  <div class="screen" id="screen-invitado-success">
+    <div class="success-wrap">
+      <div class="success-ring">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <polyline points="10,20 17,27 28,12" stroke="#4caf81" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">¡Bienvenido al club!</div>
+      <div class="badge-sync">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--success)"></div>
+        Registrado en sistema
+      </div>
+      <div class="success-detail">
+        Carlos Méndez · 18 hoyos<br>
+        Pago acreditado · Tarjeta impresa<br>
+        Que disfrutes tu ronda
+      </div>
+      <button class="btn-primary" onclick="go('home')" style="max-width:320px">Finalizar</button>
+    </div>
+  </div>
+
+  <!-- CARGAR TARJETA -->
+  <div class="screen" id="screen-cargar-tarjeta">
+    <button class="back-btn" onclick="go('home')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Post ronda</div>
+      <div class="screen-title">Cargar Tarjeta</div>
+      <div class="divider-gold"></div>
+      <div class="screen-sub">Insertá tu tarjeta en la ranura del tótem</div>
+    </div>
+    <div class="scan-box" onclick="go('ct-dni')">
+      <div class="scan-line"></div>
+      <div class="scan-icon">
+        <svg width="54" height="54" viewBox="0 0 54 54" fill="none">
+          <rect x="14" y="10" width="26" height="34" rx="3" stroke="#c9a96e" stroke-width="1.5"/>
+          <path d="M20 19h14M20 25h14M20 31h8" stroke="#c9a96e" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M27 44 L27 50 M24 47 L30 47" stroke="#40a080" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="scan-title">Ranura de tarjetas</div>
+      <div class="scan-sub">El sistema leerá tu tarjeta automáticamente<br>con reconocimiento óptico (OCR)</div>
+    </div>
+    <button class="btn-primary" onclick="go('ct-dni')" style="max-width:480px">Simular inserción de tarjeta</button>
+    <button class="btn-secondary" onclick="go('home')">Cancelar</button>
+  </div>
+
+  <!-- CARGAR TARJETA: IDENTIFICAR -->
+  <div class="screen" id="screen-ct-dni">
+    <button class="back-btn" onclick="go('cargar-tarjeta')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Cargar tarjeta</div>
+      <div class="screen-title">Ingresá tu DNI</div>
+      <div class="divider-gold"></div>
+      <div class="screen-sub">Para asociar los puntajes a tu perfil</div>
+    </div>
+    <div class="keypad-wrap">
+      <div class="dni-display">
+        <div class="dni-label-sm">Número de DNI</div>
+        <div class="dni-value">
+          <span id="ctDniText"></span>
+          <div class="dni-cursor"></div>
+        </div>
+      </div>
+      <div class="keypad-grid">
+        <button class="key-btn" onclick="ctDniKey('1')">1</button>
+        <button class="key-btn" onclick="ctDniKey('2')">2</button>
+        <button class="key-btn" onclick="ctDniKey('3')">3</button>
+        <button class="key-btn" onclick="ctDniKey('4')">4</button>
+        <button class="key-btn" onclick="ctDniKey('5')">5</button>
+        <button class="key-btn" onclick="ctDniKey('6')">6</button>
+        <button class="key-btn" onclick="ctDniKey('7')">7</button>
+        <button class="key-btn" onclick="ctDniKey('8')">8</button>
+        <button class="key-btn" onclick="ctDniKey('9')">9</button>
+        <button class="key-btn key-del" onclick="ctDniKey('del')">⌫</button>
+        <button class="key-btn" onclick="ctDniKey('0')">0</button>
+        <button class="key-btn key-ok" onclick="ctDniKey('ok')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARGAR TARJETA: OCR + GRILLA -->
+  <div class="screen" id="screen-ct-scores">
+    <button class="back-btn" onclick="go('ct-dni')">← Volver</button>
+    <div class="screen-header">
+      <div class="screen-eyebrow">Verificación de puntajes</div>
+      <div class="screen-title">Revisá tu tarjeta</div>
+      <div class="divider-gold"></div>
+      <div class="screen-sub">Tocá cualquier número para corregirlo</div>
+    </div>
+
+    <div class="score-grid-wrap">
+      <div class="score-grid-header">
+        <div class="score-grid-title">Roberto Castillo · Ronda #038 · Copa Otoño 2026</div>
+        <div class="score-grid-note">OCR completado</div>
+      </div>
+
+      <!-- Frente (hoyos 1-9) -->
+      <div class="score-row header">
+        <div class="score-cell header-cell row-label">Frente</div>
+        <div class="score-cell header-cell">1</div>
+        <div class="score-cell header-cell">2</div>
+        <div class="score-cell header-cell">3</div>
+        <div class="score-cell header-cell">4</div>
+        <div class="score-cell header-cell">5</div>
+        <div class="score-cell header-cell">6</div>
+        <div class="score-cell header-cell">7</div>
+        <div class="score-cell header-cell">8</div>
+        <div class="score-cell header-cell">9</div>
+      </div>
+      <div class="score-row">
+        <div class="score-cell row-label">Par</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">5</div>
+        <div class="score-cell par-cell">3</div>
+        <div class="score-cell par-cell">5</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">3</div>
+        <div class="score-cell par-cell">5</div>
+      </div>
+      <div class="score-row" id="scoreRowFront">
+        <div class="score-cell row-label">Golpes</div>
+      </div>
+
+      <!-- Vuelta (hoyos 10-18) -->
+      <div class="score-row header" style="margin-top:4px">
+        <div class="score-cell header-cell row-label">Vuelta</div>
+        <div class="score-cell header-cell">10</div>
+        <div class="score-cell header-cell">11</div>
+        <div class="score-cell header-cell">12</div>
+        <div class="score-cell header-cell">13</div>
+        <div class="score-cell header-cell">14</div>
+        <div class="score-cell header-cell">15</div>
+        <div class="score-cell header-cell">16</div>
+        <div class="score-cell header-cell">17</div>
+        <div class="score-cell header-cell">18</div>
+      </div>
+      <div class="score-row">
+        <div class="score-cell row-label">Par</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">3</div>
+        <div class="score-cell par-cell">5</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">5</div>
+        <div class="score-cell par-cell">3</div>
+        <div class="score-cell par-cell">4</div>
+        <div class="score-cell par-cell">5</div>
+      </div>
+      <div class="score-row" id="scoreRowBack">
+        <div class="score-cell row-label">Golpes</div>
+      </div>
+
+      <div class="score-total">
+        <div class="score-total-label">Total</div>
+        <div class="score-total-value" id="scoreTotal">82 golpes</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="go('ct-sync')">Confirmar y sincronizar</button>
+    <button class="btn-secondary" onclick="go('cargar-tarjeta')">Reinsertar tarjeta</button>
+  </div>
+
+  <!-- CARGAR TARJETA: SINCRONIZANDO -->
+  <div class="screen" id="screen-ct-sync">
+    <div class="screen-header" style="padding-top:40px">
+      <div class="screen-eyebrow">Procesando</div>
+      <div class="screen-title">Sincronizando...</div>
+      <div class="divider-gold"></div>
+    </div>
+    <div class="sync-steps" id="syncSteps">
+      <div class="sync-step" id="sync1">
+        <div class="sync-dot"></div>
+        <div class="sync-step-label">Tarjeta escaneada</div>
+        <span class="sync-check"></span>
+      </div>
+      <div class="sync-step" id="sync2">
+        <div class="sync-dot"></div>
+        <div class="sync-step-label">Validación de puntajes completada</div>
+        <span class="sync-check"></span>
+      </div>
+      <div class="sync-step" id="sync3">
+        <div class="sync-dot"></div>
+        <div class="sync-step-label">Sincronizado con Golfistics</div>
+        <span class="sync-check"></span>
+      </div>
+      <div class="sync-step" id="sync4">
+        <div class="sync-dot"></div>
+        <div class="sync-step-label">Cargado en el torneo</div>
+        <span class="sync-check"></span>
+      </div>
+      <div class="sync-step" id="sync5">
+        <div class="sync-dot"></div>
+        <div class="sync-step-label">Enviado a la AAG · Handicap actualizado</div>
+        <span class="sync-check"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARGAR TARJETA: ÉXITO FINAL -->
+  <div class="screen" id="screen-ct-success">
+    <div class="success-wrap">
+      <div class="success-ring">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <polyline points="10,20 17,27 28,12" stroke="#4caf81" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="success-title">Puntajes registrados</div>
+      <div class="badge-sync">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--success)"></div>
+        Sincronizado con Golfistics · AAG
+      </div>
+      <div class="success-detail">
+        Roberto Castillo · Ronda #038<br>
+        Total: 82 golpes · Stableford: 34 pts<br>
+        Handicap actualizado · Comprobante enviado
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;margin-top:8px">
+        <button class="btn-primary" onclick="go('home')">Finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD GERENCIAL -->
+  <div class="screen" id="screen-dashboard">
+    <button class="back-btn" onclick="go('home')" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:rgba(255,255,255,0.4)">← Salir</button>
+    <div class="dash-top" style="padding-top:60px">
+      <div class="dash-title">Panel Gerencial</div>
+      <div class="dash-live"><div class="live-dot"></div>En vivo · Hoy</div>
+    </div>
+
+    <div class="dash-section-title">Operaciones del día</div>
+    <div class="dash-grid">
+      <div class="dash-metric"><div class="dm-label">Check-ins</div><div class="dm-value" id="dm1">47</div><div class="dm-delta">+12 vs ayer</div></div>
+      <div class="dash-metric"><div class="dm-label">Ingresos</div><div class="dm-value" id="dm2">$2.3M</div><div class="dm-delta">+8% sem.</div></div>
+      <div class="dash-metric"><div class="dm-label">Socios</div><div class="dm-value">38</div><div class="dm-delta muted">de 47 totales</div></div>
+      <div class="dash-metric"><div class="dm-label">Invitados</div><div class="dm-value">9</div><div class="dm-delta">$108.000</div></div>
+    </div>
+
+    <div class="dash-section-title">Green Fees</div>
+    <div class="dash-grid cols3">
+      <div class="dash-metric"><div class="dm-label">Emitidos</div><div class="dm-value">52</div><div class="dm-delta">hoy</div></div>
+      <div class="dash-metric"><div class="dm-label">Pago QR</div><div class="dm-value">61%</div><div class="dm-delta muted">32 rondas</div></div>
+      <div class="dash-metric"><div class="dm-label">Terminal</div><div class="dm-value">39%</div><div class="dm-delta muted">20 rondas</div></div>
+    </div>
+
+    <div class="dash-section-title">Uso de canchas</div>
+    <div class="dash-grid">
+      <div class="dash-metric"><div class="dm-label">9 hoyos</div><div class="dm-value">14</div><div class="dm-delta muted">rondas</div></div>
+      <div class="dash-metric"><div class="dm-label">18 hoyos</div><div class="dm-value">31</div><div class="dm-delta muted">rondas</div></div>
+      <div class="dash-metric"><div class="dm-label">36 hoyos</div><div class="dm-value">4</div><div class="dm-delta muted">rondas</div></div>
+      <div class="dash-metric"><div class="dm-label">Torneo</div><div class="dm-value">42</div><div class="dm-delta">inscriptos</div></div>
+    </div>
+
+    <div class="dash-section-title">Tees del día</div>
+    <div class="dash-grid cols3">
+      <div class="dash-metric"><div class="dm-label" style="color:rgba(224,80,80,0.7)">Tee Rojo</div><div class="dm-value">8</div><div class="dm-delta muted">damas</div></div>
+      <div class="dash-metric"><div class="dm-label" style="color:rgba(221,192,64,0.7)">Tee Amarillo</div><div class="dm-value">29</div><div class="dm-delta muted">caballeros</div></div>
+      <div class="dash-metric"><div class="dm-label" style="color:rgba(64,112,224,0.7)">Tee Azul</div><div class="dm-value">15</div><div class="dm-delta muted">scratch</div></div>
+    </div>
+
+    <div class="dash-section-title">Tarjetas y automatización</div>
+    <div class="dash-grid cols2">
+      <div class="dash-metric"><div class="dm-label">Tarjetas cargadas</div><div class="dm-value">38</div><div class="dm-delta">automático</div></div>
+      <div class="dash-metric"><div class="dm-label">Corregidas manualmente</div><div class="dm-value">3</div><div class="dm-delta warn">7.9% del total</div></div>
+      <div class="dash-metric"><div class="dm-label">% Automatización</div><div class="dm-value">92%</div><div class="dm-delta">de tareas admin</div></div>
+      <div class="dash-metric"><div class="dm-label">Horas ahorradas</div><div class="dm-value">6.2h</div><div class="dm-delta">hoy</div></div>
+    </div>
+
+    <div class="dash-section-title">Socios y facturación</div>
+    <div class="dash-grid cols3">
+      <div class="dash-metric"><div class="dm-label">Cuotas cobradas</div><div class="dm-value">98%</div><div class="dm-delta">de 612 socios</div></div>
+      <div class="dash-metric"><div class="dm-label">Cuentas consultadas</div><div class="dm-value">14</div><div class="dm-delta muted">hoy</div></div>
+      <div class="dash-metric"><div class="dm-label">HCP promedio</div><div class="dm-value">18.3</div><div class="dm-delta muted">del club</div></div>
+    </div>
+
+    <div class="dash-section-title">Estado del sistema</div>
+    <div class="system-status"><span class="sys-label">Tótem recepción</span><span class="sys-value">Operativo</span></div>
+    <div class="system-status" style="margin-top:8px"><span class="sys-label">Conexión Golfistics</span><span class="sys-value">Sincronizado</span></div>
+    <div class="system-status" style="margin-top:8px"><span class="sys-label">Terminal de cobro</span><span class="sys-value">En línea</span></div>
+    <div class="system-status" style="margin-top:8px"><span class="sys-label">Impresora térmica</span><span class="sys-value">Operativa · Papel OK</span></div>
+
+    <div class="dash-section-title">Alertas</div>
+    <div class="alert-item"><div class="alert-dot"></div>12 socios sin cuota de mayo · Vencimiento en 8 días</div>
+    <div class="alert-item" style="margin-top:8px"><div class="alert-dot"></div>Torneo Copa Otoño · 6 inscriptos pendientes de pago</div>
+  </div>
+
+  <!-- MINI KEYPAD para editar puntajes -->
+  <div class="mini-keypad-overlay" id="miniKeypadOverlay">
+    <div class="mini-keypad">
+      <div class="mini-keypad-title" id="miniKeyTitle">Hoyo —</div>
+      <div class="mini-keypad-display" id="miniKeyDisplay">—</div>
+      <div class="mini-grid">
+        <div class="mini-key" onclick="mkPress('1')">1</div>
+        <div class="mini-key" onclick="mkPress('2')">2</div>
+        <div class="mini-key" onclick="mkPress('3')">3</div>
+        <div class="mini-key" onclick="mkPress('4')">4</div>
+        <div class="mini-key" onclick="mkPress('5')">5</div>
+        <div class="mini-key" onclick="mkPress('6')">6</div>
+        <div class="mini-key" onclick="mkPress('7')">7</div>
+        <div class="mini-key" onclick="mkPress('8')">8</div>
+        <div class="mini-key" onclick="mkPress('9')">9</div>
+        <div class="mini-key cancel-key" onclick="mkClose()">Cancelar</div>
+        <div class="mini-key" onclick="mkPress('0')">0</div>
+        <div class="mini-key ok-key" onclick="mkConfirm()">OK</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  dni: '',
+  ctDni: '',
+  currentSocio: null,
+  selectedHoyos: 0,
+  selectedHoyosInv: 0,
+  selectedTee: '',
+  gfTorneoMode: false,
+  scores: {
+    front: [5,4,6,3,5,4,7,4,5],
+    back:  [5,3,6,4,5,6,3,5,6]
+  },
+  editingCell: null,
+  miniValue: '',
+  invTab: 'nombre'
+};
+
+const socios = [
+  { dni:'12345678', nombre:'Roberto Castillo', matricula:'4821', hcp:'12.4', cuota:'Al día', rondas:28 },
+  { dni:'28441903', nombre:'Carlos Méndez',    matricula:'3204', hcp:'18.2', cuota:'Al día', rondas:12 },
+  { dni:'11111111', nombre:'Martín González',  matricula:'2891', hcp:'24.6', cuota:'Vencida', rondas:5 },
+];
+
+/* ============================================================
+   CLOCK
+============================================================ */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clockTime').textContent = h + ':' + m;
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('clockDate').textContent =
+    dias[now.getDay()] + ' ' + now.getDate() + ' ' + meses[now.getMonth()] + ' ' + now.getFullYear();
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+function go(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + screenId);
+  if (target) {
+    target.classList.add('active');
+    target.scrollTop = 0;
+  }
+  if (screenId === 'ct-sync') runSync();
+  if (screenId === 'ct-scores') buildScoreGrid();
+}
+
+/* ============================================================
+   DNI KEYPAD — socios
+============================================================ */
+function dniKey(v) {
+  if (v === 'del') { state.dni = state.dni.slice(0,-1); }
+  else if (v === 'ok') {
+    if (state.dni.length < 6) return;
+    const socio = socios.find(s => s.dni === state.dni) ||
+      { nombre:'Roberto Castillo', matricula:'4821', hcp:'12.4', cuota:'Al día', rondas:28 };
+    state.currentSocio = socio;
+    renderProfile(socio);
+    go('socio-perfil');
+    return;
+  }
+  else if (state.dni.length < 8) { state.dni += v; }
+  document.getElementById('dniText').textContent = state.dni;
+}
+
+/* ============================================================
+   DNI KEYPAD — cargar tarjeta
+============================================================ */
+function ctDniKey(v) {
+  if (v === 'del') { state.ctDni = state.ctDni.slice(0,-1); }
+  else if (v === 'ok') {
+    if (state.ctDni.length < 6) return;
+    go('ct-scores');
+    return;
+  }
+  else if (state.ctDni.length < 8) { state.ctDni += v; }
+  document.getElementById('ctDniText').textContent = state.ctDni;
+}
+
+/* ============================================================
+   SOCIO PROFILE
+============================================================ */
+function renderProfile(s) {
+  const initials = s.nombre.split(' ').map(w=>w[0]).slice(0,2).join('');
+  document.getElementById('profileAvatar').textContent = initials;
+  document.getElementById('profileName').textContent = s.nombre;
+  document.getElementById('profileGreeting').textContent = 'Hola, ' + s.nombre.split(' ')[0];
+  document.getElementById('profileMatricula').textContent = 'Matrícula #' + s.matricula + ' · Socio Activo';
+  document.getElementById('profileHcp').textContent = s.hcp;
+  const cuotaEl = document.getElementById('profileCuota');
+  cuotaEl.textContent = s.cuota;
+  cuotaEl.className = 'stat-value ' + (s.cuota === 'Al día' ? 'ok' : 'warn');
+  document.getElementById('profileRondas').textContent = s.rondas;
+  document.getElementById('cuentaSocio').textContent = s.nombre;
+}
+
+/* ============================================================
+   GOLFISTICS
+============================================================ */
+function openGolfistics() {
+  window.open('https://www.mardelplatagolf.com/golf/index2.php','_blank');
+}
+
+/* ============================================================
+   GREEN FEE
+============================================================ */
+function gfTorneo(isTorneo) {
+  state.gfTorneoMode = isTorneo;
+  state.selectedTee = '';
+  state.selectedHoyos = isTorneo ? 18 : 0;
+  go(isTorneo ? 'gf-torneo' : 'gf-libre');
+}
+
+function selectTee(tee, btn) {
+  state.selectedTee = tee;
+  const parent = btn.closest('.choice-grid');
+  parent.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkGfReady();
+}
+
+function selectHoyos(n, btn) {
+  state.selectedHoyos = n;
+  const parent = btn.closest('.choice-grid');
+  parent.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  checkGfReady();
+}
+
+function checkGfReady() {
+  const ok1 = document.getElementById('btnGfTorneoOk');
+  const ok2 = document.getElementById('btnGfLibreOk');
+  const ready = state.selectedTee !== '' && (state.gfTorneoMode || state.selectedHoyos > 0);
+  [ok1,ok2].forEach(btn => {
+    if (!btn) return;
+    btn.style.opacity = ready ? '1' : '0.4';
+    btn.style.pointerEvents = ready ? 'auto' : 'none';
+  });
+  if (ready) {
+    const hcp = parseFloat((state.currentSocio || {hcp:'12.4'}).hcp || '12.4');
+    document.getElementById('hcpIndex').textContent = hcp;
+    document.getElementById('hcpSlope').textContent = '113';
+    document.getElementById('hcpResult').textContent = Math.round(hcp);
+    document.getElementById('hcpTee').textContent = state.selectedTee.charAt(0).toUpperCase() + state.selectedTee.slice(1);
+    document.getElementById('hcpHoyos').textContent = state.gfTorneoMode ? 18 : state.selectedHoyos;
+    const prices = { 9: '$6.500', 18: '$8.500', 36: '$15.000' };
+    document.getElementById('gfAmount').textContent = prices[state.gfTorneoMode ? 18 : state.selectedHoyos] || '$8.500';
+    const nombre = (state.currentSocio || {nombre:'Roberto Castillo'}).nombre;
+    const teeLabel = state.selectedTee.charAt(0).toUpperCase() + state.selectedTee.slice(1);
+    const hoyos = state.gfTorneoMode ? 18 : state.selectedHoyos;
+    document.getElementById('gfSuccessDetail').innerHTML =
+      nombre + ' · Tee ' + teeLabel + ' · ' + hoyos + ' hoyos<br>Handicap de juego: ' + Math.round(hcp) + '<br>Pago acreditado automáticamente';
+  }
+}
+
+/* ============================================================
+   INVITADOS
+============================================================ */
+function invTab(tab) {
+  state.invTab = tab;
+  document.getElementById('invNombreField').style.display = tab === 'nombre' ? 'block' : 'none';
+  document.getElementById('invDniField').style.display = tab === 'dni' ? 'block' : 'none';
+  document.getElementById('invNombreTab').className = 'field-nav-btn' + (tab==='nombre'?' active':'');
+  document.getElementById('invDniTab').className = 'field-nav-btn' + (tab==='dni'?' active':'');
+}
+
+function selectHoyosInv(n, btn) {
+  state.selectedHoyosInv = n;
+  btn.closest('.choice-grid').querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function invTeclado(field) { /* demo — valores ya mostrados */ }
+
+/* ============================================================
+   SCORE GRID
+============================================================ */
+function buildScoreGrid() {
+  buildRow('scoreRowFront', state.scores.front, 1);
+  buildRow('scoreRowBack', state.scores.back, 10);
+  updateTotal();
+}
+
+function buildRow(rowId, scores, startHole) {
+  const row = document.getElementById(rowId);
+  while (row.children.length > 1) row.removeChild(row.lastChild);
+  scores.forEach((s, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'score-cell editable';
+    cell.textContent = s;
+    cell.onclick = () => openMiniKeypad(rowId, i, startHole + i, s);
+    row.appendChild(cell);
+  });
+}
+
+function updateTotal() {
+  const total = [...state.scores.front, ...state.scores.back].reduce((a,b)=>a+b,0);
+  document.getElementById('scoreTotal').textContent = total + ' golpes';
+}
+
+/* ============================================================
+   MINI KEYPAD
+============================================================ */
+function openMiniKeypad(rowId, idx, hole, current) {
+  state.editingCell = { rowId, idx, hole };
+  state.miniValue = String(current);
+  document.getElementById('miniKeyTitle').textContent = 'Hoyo ' + hole;
+  document.getElementById('miniKeyDisplay').textContent = state.miniValue;
+  document.getElementById('miniKeypadOverlay').classList.add('open');
+}
+
+function mkPress(v) {
+  if (state.miniValue.length >= 2) state.miniValue = '';
+  state.miniValue += v;
+  document.getElementById('miniKeyDisplay').textContent = state.miniValue;
+}
+
+function mkClose() {
+  state.miniValue = '';
+  state.editingCell = null;
+  document.getElementById('miniKeypadOverlay').classList.remove('open');
+}
+
+function mkConfirm() {
+  const val = parseInt(state.miniValue);
+  if (!val || val < 1 || val > 15) { mkClose(); return; }
+  const { rowId, idx } = state.editingCell;
+  if (rowId === 'scoreRowFront') state.scores.front[idx] = val;
+  else state.scores.back[idx] = val;
+  buildScoreGrid();
+  mkClose();
+}
+
+/* ============================================================
+   SYNC ANIMATION
+============================================================ */
+function runSync() {
+  const steps = ['sync1','sync2','sync3','sync4','sync5'];
+  steps.forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'sync-step';
+    el.querySelector('.sync-check').textContent = '';
+    el.querySelector('.sync-dot').style.background = 'var(--border)';
+  });
+
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      el.classList.add('active');
+    }, i * 700);
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      el.classList.remove('active');
+      el.classList.add('done');
+      el.querySelector('.sync-check').textContent = '✓';
+      if (i === steps.length - 1) {
+        setTimeout(() => go('ct-success'), 600);
+      }
+    }, i * 700 + 600);
+  });
+}
+
+/* ============================================================
+   RESET DNI on screen entry
+============================================================ */
+document.getElementById('screen-socio-dni').addEventListener('animationstart', () => {
+  state.dni = '';
+  document.getElementById('dniText').textContent = '';
+});
+document.getElementById('screen-ct-dni').addEventListener('animationstart', () => {
+  state.ctDni = '';
+  document.getElementById('ctDniText').textContent = '';
+});
+</script>
+</body>
+</html>
