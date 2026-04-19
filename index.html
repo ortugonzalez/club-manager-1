@@ -49,8 +49,10 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 .screen::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
 /* ── BACK BTN ── */
-.back{position:absolute;top:16px;left:24px;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--border2);color:var(--text-mid);font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .25s;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.back{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--border2);color:var(--text-mid);font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .25s;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.08);align-self:flex-start;margin-top:16px;margin-bottom:4px;margin-left:0;}
 .back:hover{border-color:var(--gold2);color:var(--navy);background:var(--bg-light);}
+/* screens with back btn need padding-top reset */
+.screen.has-back{padding-top:8px;}
 
 /* ── SCREEN HEADER ── */
 .sh{width:100%;max-width:640px;padding:28px 0 18px;text-align:center;}
@@ -265,13 +267,13 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 .torneo-card{width:100%;max-width:540px;background:var(--white);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:18px;}
 .tc-head{background:linear-gradient(135deg,var(--bg-light),var(--white));padding:22px 24px;border-bottom:1px solid var(--border);}
 .tc-formato{font-family:var(--cinzel);font-size:9px;letter-spacing:.3em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;}
-.tc-nombre{font-family:var(--serif);font-size:24px;color:var(--bg-light);margin-bottom:4px;}
+.tc-nombre{font-family:var(--serif);font-size:24px;color:var(--text-dark);margin-bottom:4px;}
 .tc-detalle{font-size:12px;color:var(--muted);font-style:italic;}
 .tc-stats{display:grid;grid-template-columns:repeat(3,1fr);}
 .tc-stat{padding:14px 16px;border-right:1px solid var(--border);text-align:center;}
 .tc-stat:last-child{border-right:none;}
 .tc-stat-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.tc-stat-val{font-family:var(--serif);font-size:20px;color:var(--bg-light);}
+.tc-stat-val{font-family:var(--serif);font-size:20px;color:var(--text-dark);}
 
 /* ── DASHBOARD ── */
 #screen-dashboard{background:#0a0f1a;padding:16px 20px 32px;gap:14px;}
@@ -386,7 +388,18 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 .btn-s{width:100%;max-width:480px;padding:15px;background:transparent;color:var(--text-mid);font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .25s;margin-top:8px;}
 .btn-s:hover{border-color:var(--border2);color:var(--navy);}
 
-/* ── QR MODAL ── */
+/* ── MÁS ACCIONES MODAL ── */
+.mas-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:260;align-items:center;justify-content:center;padding:24px;}
+.mas-overlay.open{display:flex;animation:mkIn .25s ease;}
+.mas-box{background:#fff;border-radius:var(--rl);padding:36px 32px;width:100%;max-width:400px;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.18);}
+.mas-icon{font-size:40px;margin-bottom:16px;}
+.mas-title{font-family:var(--serif);font-size:26px;font-weight:300;color:var(--text-dark);margin-bottom:8px;}
+.mas-sub{font-size:13px;color:var(--muted);font-style:italic;margin-bottom:28px;line-height:1.6;}
+.mas-btns{display:flex;gap:12px;}
+.mas-btn-si{flex:1;padding:16px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .25s;}
+.mas-btn-si:hover{background:var(--navy3);}
+.mas-btn-no{flex:1;padding:16px;background:transparent;color:var(--muted);border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--sans);font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;transition:all .25s;}
+.mas-btn-no:hover{border-color:var(--border2);color:var(--text-dark);}
 .qr-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:250;align-items:center;justify-content:center;}
 .qr-overlay.open{display:flex;animation:mkIn .25s ease;}
 .qr-box{background:#fff;border-radius:var(--rl);padding:32px 28px;width:300px;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.2);}
@@ -558,7 +571,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ SOCIO DNI -->
-<div class="screen" id="screen-socio-dni">
+<div class="screen has-back" id="screen-socio-dni">
   <button class="back" onclick="go('home')">← Volver</button>
   <div class="sh"><div class="sh-eye">Acceso de socios</div><div class="sh-title">Ingresá tu DNI</div><div class="divgold"></div><div class="sh-sub">Teclado numérico en pantalla</div></div>
   <div class="kp-wrap">
@@ -573,7 +586,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ SOCIO PERFIL -->
-<div class="screen" id="screen-socio-perfil">
+<div class="screen has-back" id="screen-socio-perfil">
   <button class="back" onclick="go('socio-dni')">← Volver</button>
   <div class="sh"><div class="sh-eye">Bienvenido</div><div class="sh-title" id="profileGreeting">Hola, Roberto</div><div class="divgold"></div></div>
   <div class="profile-card">
@@ -600,7 +613,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ SECRETARÍA -->
-<div class="screen" id="screen-secretaria">
+<div class="screen has-back" id="screen-secretaria">
   <button class="back" onclick="go('socio-perfil')">← Volver</button>
   <div class="sh"><div class="sh-eye">Servicios del club</div><div class="sh-title">Secretaría</div><div class="divgold"></div></div>
   <div class="sec-list">
@@ -620,7 +633,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ GF: TIPO -->
-<div class="screen" id="screen-gf-tipo">
+<div class="screen has-back" id="screen-gf-tipo">
   <button class="back" onclick="go('secretaria')">← Volver</button>
   <div class="sh"><div class="sh-eye">Green Fee</div><div class="sh-title">¿Jugás en torneo?</div><div class="divgold"></div></div>
   <div class="cg cg2" style="max-width:480px">
@@ -638,7 +651,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ GF: TORNEO INFO -->
-<div class="screen" id="screen-gf-torneo">
+<div class="screen has-back" id="screen-gf-torneo">
   <button class="back" onclick="go('gf-tipo')">← Volver</button>
   <div class="sh"><div class="sh-eye">Torneo del día</div><div class="sh-title">Copa 2 de Abril</div><div class="divgold"></div></div>
   <div class="torneo-card">
@@ -659,7 +672,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ GF: PRÁCTICA -->
-<div class="screen" id="screen-gf-practica">
+<div class="screen has-back" id="screen-gf-practica">
   <button class="back" onclick="go('gf-tipo')">← Volver</button>
   <div class="sh"><div class="sh-eye">Vuelta de Práctica</div><div class="sh-title">¿Querés tarjeta?</div><div class="divgold"></div></div>
   <div class="cg cg2" style="max-width:480px">
@@ -678,7 +691,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ GF: ELIGE TEE + SALIDA (práctica con tarjeta) -->
-<div class="screen" id="screen-gf-tee">
+<div class="screen has-back" id="screen-gf-tee">
   <button class="back" onclick="go('gf-practica')">← Volver</button>
   <div class="sh"><div class="sh-eye">Vuelta de Práctica</div><div class="sh-title">Elegí tu boca de salida</div><div class="divgold"></div></div>
   <div class="salida-grid" id="salidaGridPrac"></div>
@@ -686,7 +699,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ GF: PAGO -->
-<div class="screen" id="screen-gf-pago">
+<div class="screen has-back" id="screen-gf-pago">
   <button class="back" onclick="history.back()">← Volver</button>
   <div class="sh"><div class="sh-eye">Green Fee</div><div class="sh-title">Resumen y pago</div><div class="divgold"></div></div>
   <div class="hcp-box">
@@ -707,6 +720,8 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
   <div class="pago-methods">
     <div class="pm-btn" onclick="showQr(S.socio?S.socio.nombre:'Socio', document.getElementById('gfAmount').textContent, 'Green Fee')"><div class="pm-ico">📱</div><div><div>Pagar con QR</div><div class="pm-sub">Mercado Pago · Modo · Cualquier billetera</div></div></div>
     <div class="pm-btn" onclick="go('gf-success')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
+    <div class="pm-btn" onclick="go('gf-success')"><div class="pm-ico">🏦</div><div><div>Débito automático CBU</div><div class="pm-sub">Adherite para cobros futuros automáticos</div></div></div>
+    <div class="pm-btn" onclick="go('gf-success')"><div class="pm-ico">📋</div><div><div>Cuenta corriente</div><div class="pm-sub">Cargar a mi cuenta · Se descuenta del saldo disponible</div></div></div>
   </div>
 </div>
 
@@ -717,17 +732,17 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="success-title">¡Listo para jugar!</div>
     <div class="badge-sync"><div class="badge-dot"></div>Tarjeta impresa</div>
     <div class="success-detail" id="gfSuccessDetail">Roberto Castillo · Boca 1 · 18 hoyos<br>Handicap de juego: 12 · Medal Play<br>Pago acreditado automáticamente</div>
-    <button class="btn-p" onclick="go('home')" style="max-width:300px">Finalizar</button>
+    <button class="btn-p" onclick="showMas('socio')" style="max-width:300px">Finalizar</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ ESTADO DE CUENTA -->
-<div class="screen" id="screen-estado-cuenta">
+<div class="screen has-back" id="screen-estado-cuenta">
   <button class="back" onclick="go('secretaria')">← Volver</button>
   <div class="sh"><div class="sh-eye">Secretaría</div><div class="sh-title">Estado de Cuenta</div><div class="divgold"></div></div>
   <div class="cuenta-card">
     <div class="cc-head">
-      <div><div style="font-family:var(--serif);font-size:18px;color:var(--bg-light)" id="cuentaNombre">Roberto Castillo</div><div style="font-size:10px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:3px">Matrícula #4821</div></div>
+      <div><div style="font-family:var(--serif);font-size:18px;color:var(--text-dark)" id="cuentaNombre">Roberto Castillo</div><div style="font-size:10px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;margin-top:3px">Matrícula #4821</div></div>
       <div style="text-align:right"><div style="font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase">Saldo</div><div style="font-family:var(--serif);font-size:26px;color:var(--success)">$0</div></div>
     </div>
     <div class="cc-row"><span class="cc-key">Cuota mensual</span><span class="cc-val pos">Pagada · Abril 2026</span></div>
@@ -742,7 +757,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ PAGAR CUOTA -->
-<div class="screen" id="screen-pagar-cuota">
+<div class="screen has-back" id="screen-pagar-cuota">
   <button class="back" onclick="go('secretaria')">← Volver</button>
   <div class="sh"><div class="sh-eye">Secretaría</div><div class="sh-title">Pagar Cuota</div><div class="divgold"></div></div>
   <div class="pago-box">
@@ -765,12 +780,12 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="success-title">Cuota pagada</div>
     <div class="badge-sync"><div class="badge-dot"></div>Acreditado en sistema</div>
     <div class="success-detail">Abril 2026 · $85.000<br>Comprobante enviado al email registrado</div>
-    <button class="btn-p" onclick="go('home')" style="max-width:300px">Finalizar</button>
+    <button class="btn-p" onclick="showMas('socio')" style="max-width:300px">Finalizar</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ INVITADO (flujo por pasos) -->
-<div class="screen" id="screen-invitado">
+<div class="screen has-back" id="screen-invitado">
   <button class="back" onclick="go('home')">← Volver</button>
   <div class="sh"><div class="sh-eye">Acceso de invitados</div><div class="sh-title" id="invTitle">Ingresá tu DNI</div><div class="divgold"></div></div>
   <div class="inv-progress full-w"><div class="inv-progress-fill" id="invProgress" style="width:16%"></div></div>
@@ -798,7 +813,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ INVITADO PAGO -->
-<div class="screen" id="screen-invitado-pago">
+<div class="screen has-back" id="screen-invitado-pago">
   <button class="back" onclick="go('invitado')">← Volver</button>
   <div class="sh"><div class="sh-eye">Invitado</div><div class="sh-title">Abonar ingreso</div><div class="divgold"></div></div>
   <div class="pago-box">
@@ -807,7 +822,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="pago-sub" id="invPagoSub">Invitado · 18 hoyos</div>
   </div>
   <div class="pago-methods">
-    <div class="pm-btn" onclick="go('invitado-success')"><div class="pm-ico">📱</div><div><div>Pagar con QR</div><div class="pm-sub">Mercado Pago · Modo · Cualquier billetera</div></div></div>
+    <div class="pm-btn" onclick="showQr(S.invData.nombre||'Invitado', document.getElementById('invPagoAmount').textContent, 'Arancel de visita')"><div class="pm-ico">📱</div><div><div>Pagar con QR</div><div class="pm-sub">Mercado Pago · Modo · Cualquier billetera</div></div></div>
     <div class="pm-btn" onclick="go('invitado-success')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
   </div>
 </div>
@@ -819,18 +834,18 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="success-title">¡Bienvenido al club!</div>
     <div class="badge-sync"><div class="badge-dot"></div>Registrado en sistema</div>
     <div class="success-detail" id="invSuccessDetail">Invitado registrado<br>Pago acreditado · Tarjeta impresa</div>
-    <button class="btn-p" onclick="go('home')" style="max-width:300px">Finalizar</button>
+    <button class="btn-p" onclick="showMas('invitado')" style="max-width:300px">Finalizar</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ CARGAR TARJETA -->
-<div class="screen" id="screen-cargar-tarjeta">
+<div class="screen has-back" id="screen-cargar-tarjeta">
   <button class="back" onclick="go('home')">← Volver</button>
   <div class="sh"><div class="sh-eye">Post ronda</div><div class="sh-title">Cargar Tarjeta</div><div class="divgold"></div><div class="sh-sub">Insertá tu tarjeta en la ranura inferior del tótem</div></div>
   <div style="width:100%;max-width:460px;background:var(--white);border:2px dashed var(--border2);border-radius:var(--rl);padding:44px 28px;text-align:center;cursor:pointer;position:relative;overflow:hidden;margin-bottom:20px" onclick="go('ct-dni')">
     <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:scanLine 2.5s ease-in-out infinite;opacity:.6"></div>
     <svg style="margin:0 auto 14px;display:block" width="52" height="52" viewBox="0 0 52 52" fill="none"><rect x="13" y="10" width="26" height="32" rx="3" stroke="#c4a862" stroke-width="1.4"/><path d="M19 19h14M19 24h14M19 29h8" stroke="#c4a862" stroke-width="1.2" stroke-linecap="round"/><path d="M26 42v6M23 45h6" stroke="#40a080" stroke-width="1.4" stroke-linecap="round"/></svg>
-    <div style="font-family:var(--serif);font-size:20px;color:var(--bg-light);margin-bottom:6px">Ranura de tarjetas</div>
+    <div style="font-family:var(--serif);font-size:20px;color:var(--text-dark);margin-bottom:6px">Ranura de tarjetas</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.6;font-style:italic">El sistema lee automáticamente los puntajes<br>con reconocimiento óptico (OCR)</div>
   </div>
   <button class="btn-p" style="max-width:460px" onclick="go('ct-dni')">Simular inserción</button>
@@ -839,7 +854,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 <style>@keyframes scanLine{0%{top:15%}50%{top:80%}100%{top:15%}}</style>
 
 <!-- ══════════════════════════════════════ CT: DNI -->
-<div class="screen" id="screen-ct-dni">
+<div class="screen has-back" id="screen-ct-dni">
   <button class="back" onclick="go('cargar-tarjeta')">← Volver</button>
   <div class="sh"><div class="sh-eye">Cargar tarjeta</div><div class="sh-title">Ingresá tu DNI</div><div class="divgold"></div><div class="sh-sub">Para asociar los puntajes a tu perfil</div></div>
   <div class="kp-wrap">
@@ -854,7 +869,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </div>
 
 <!-- ══════════════════════════════════════ CT: SCORES -->
-<div class="screen" id="screen-ct-scores">
+<div class="screen has-back" id="screen-ct-scores">
   <button class="back" onclick="go('ct-dni')">← Volver</button>
   <div class="sh" style="padding-top:20px"><div class="sh-eye">Verificación OCR</div><div class="sh-title">Revisá tu tarjeta</div><div class="divgold"></div><div class="sh-sub">Tocá cualquier número para corregirlo</div></div>
   <div class="sg-wrap">
@@ -897,7 +912,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="success-title">Tarjeta presentada</div>
     <div class="badge-sync"><div class="badge-dot"></div>Sincronizado con Golfistics · AAG</div>
     <div class="success-detail">Roberto Castillo · Ronda #038<br>Total: 82 golpes · Medal Play<br>Handicap actualizado · Comprobante enviado</div>
-    <button class="btn-p" onclick="go('home')" style="max-width:300px">Finalizar</button>
+    <button class="btn-p" onclick="showMas('socio')" style="max-width:300px">Finalizar</button>
   </div>
 </div>
 
@@ -1046,7 +1061,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="dash-sec-title">Historia del club</div>
     <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer" onclick="openHistoria()">
       <div style="font-family:var(--cinzel);font-size:10px;letter-spacing:.25em;color:var(--gold);margin-bottom:6px">MDPGC · Desde 1898</div>
-      <div style="font-family:var(--serif);font-size:18px;color:var(--bg-light);margin-bottom:6px">Historia del Mar del Plata Golf Club</div>
+      <div style="font-family:var(--serif);font-size:18px;color:var(--text-dark);margin-bottom:6px">Historia del Mar del Plata Golf Club</div>
       <div style="font-size:12px;color:var(--muted);font-style:italic">126 años de tradición · La Catedral del Golf · Ver historia completa →</div>
     </div>
     <div class="dash-sec-title">Reglas USGA con IA</div>
@@ -1579,6 +1594,25 @@ function removeReglaLoading(){ const l=document.getElementById('rloading'); if(l
 /* ── HISTORIA ── */
 function openHistoria(){document.getElementById('historiaModal').classList.add('open');}
 
+/* ── MÁS ACCIONES ── */
+function showMas(tipo){
+  S.masType = tipo;
+  const sub = tipo === 'invitado'
+    ? 'Podés volver a tu panel de invitado para otra gestión, o finalizar.'
+    : 'Podés volver a tu panel para realizar otra gestión, o finalizar tu sesión.';
+  document.getElementById('masSubText').textContent = sub;
+  document.getElementById('masOverlay').classList.add('open');
+}
+function masResponder(continuar){
+  document.getElementById('masOverlay').classList.remove('open');
+  if(continuar){
+    if(S.masType === 'invitado') go('invitado');
+    else go('socio-perfil');
+  } else {
+    go('home');
+  }
+}
+
 /* ── QR CODE ── */
 function showQr(nombre, monto, concepto){
   document.getElementById('qrNombre').textContent=nombre;
@@ -1614,6 +1648,19 @@ document.getElementById('screen-invitado').addEventListener('animationstart',()=
 document.getElementById('screen-socio-dni').addEventListener('animationstart',()=>{S.dni='';document.getElementById('dniText').textContent='';});
 document.getElementById('screen-ct-dni').addEventListener('animationstart',()=>{S.ctDni='';document.getElementById('ctDniText').textContent='';});
 </script>
+
+<!-- ══════════════════════════════════════ MÁS ACCIONES MODAL -->
+<div class="mas-overlay" id="masOverlay">
+  <div class="mas-box">
+    <div class="mas-icon">⛳</div>
+    <div class="mas-title">¿Querés hacer algo más?</div>
+    <div class="mas-sub" id="masSubText">Podés volver a tu panel para realizar otra gestión o finalizar tu sesión.</div>
+    <div class="mas-btns">
+      <button class="mas-btn-si" id="masBtnSi" onclick="masResponder(true)">Sí, continuar</button>
+      <button class="mas-btn-no" onclick="masResponder(false)">No, finalizar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════ QR MODAL -->
 <div class="qr-overlay" id="qrOverlay">
