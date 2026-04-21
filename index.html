@@ -518,29 +518,243 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 </style>
 </head>
 <body>
+<!-- ══ M1 SPLASH SCREEN ══ -->
+<div id="splash-screen">
+  <img class="splash-escudo" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/escudo.png" alt="Escudo" onerror="this.style.display='none'">
+  <div class="splash-club">Mar del Plata Golf Club</div>
+  <div class="splash-sub">Club Manager Pro</div>
+  <div class="splash-bar-wrap"><div class="splash-bar" id="splashBar"></div></div>
+</div>
+
+<!-- ══ M9 SCREENSAVER ══ -->
+<div id="screensaver-overlay">
+  <img class="ss-escudo" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/escudo.png" alt="">
+  <div class="ss-msg">¿Seguís ahí? Tu sesión se cerrará en</div>
+  <div class="ss-counter" id="ssCounter">60</div>
+  <button class="ss-btn" onclick="resetInactivity()">Sí, continuar</button>
+</div>
+
+<!-- ══ M2 ADMIN OVERLAY ══ -->
+<div id="admin-overlay">
+  <div class="admin-box">
+    <div class="admin-header">
+      <div class="admin-title">Modo Administrador</div>
+      <button class="admin-close" onclick="closeAdmin()">×</button>
+    </div>
+    <!-- PIN input -->
+    <div id="admin-pin-section" class="admin-body">
+      <div class="admin-pin-display" id="adminPinDisplay">• • • •</div>
+      <div class="admin-pin-grid">
+        <div class="admin-pin-key" onclick="adminPin('1')">1</div><div class="admin-pin-key" onclick="adminPin('2')">2</div><div class="admin-pin-key" onclick="adminPin('3')">3</div>
+        <div class="admin-pin-key" onclick="adminPin('4')">4</div><div class="admin-pin-key" onclick="adminPin('5')">5</div><div class="admin-pin-key" onclick="adminPin('6')">6</div>
+        <div class="admin-pin-key" onclick="adminPin('7')">7</div><div class="admin-pin-key" onclick="adminPin('8')">8</div><div class="admin-pin-key" onclick="adminPin('9')">9</div>
+        <div class="admin-pin-key" onclick="adminPin('del')" style="font-size:16px">⌫</div><div class="admin-pin-key" onclick="adminPin('0')">0</div><div class="admin-pin-key" onclick="adminPin('ok')" style="background:#0d1f14;color:#fff;font-size:13px;letter-spacing:.1em">OK</div>
+      </div>
+      <div class="admin-err" id="adminErr"></div>
+    </div>
+    <!-- Panel (shown after PIN OK) -->
+    <div id="admin-panel-section" class="admin-panel">
+      <div class="admin-tabs">
+        <button class="admin-tab active" onclick="adminTab(0,this)">Config</button>
+        <button class="admin-tab" onclick="adminTab(1,this)">Socios</button>
+        <button class="admin-tab" onclick="adminTab(2,this)">Sistema</button>
+      </div>
+      <!-- Tab 0: Config -->
+      <div class="admin-tab-content active" id="atab0">
+        <div class="admin-field"><label>Torneo del día</label><input type="text" id="adminTorneo" placeholder="Copa 2 de Abril"></div>
+        <div class="admin-field"><label>Precio Green Fee (torneo)</label><input type="text" id="adminPrecioGF" placeholder="$15.000"></div>
+        <div class="admin-field"><label>Bocas habilitadas</label><select id="adminBocas"><option>Todas las bocas</option><option>Solo Boca 1</option><option>Bocas 1 y 10</option><option>Bocas 1, 4 y 10</option></select></div>
+        <div class="admin-field"><label>Mensaje de bienvenida</label><textarea id="adminBienvenida" rows="2" placeholder="Bienvenido al club"></textarea></div>
+        <button class="admin-save" onclick="adminGuardar()">Guardar cambios</button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+          <button class="admin-save" style="background:#1a3d24;margin-bottom:8px;" onclick="activarKiosk()">Activar modo tótem (fullscreen)</button>
+        </div>
+      </div>
+      <!-- Tab 1: Búsqueda socios -->
+      <div class="admin-tab-content" id="atab1">
+        <input class="admin-search-input" id="adminSearchInput" placeholder="Buscar por nombre o matrícula..." oninput="adminSearch(this.value)">
+        <div id="adminSearchResults"></div>
+      </div>
+      <!-- Tab 2: Sistema -->
+      <div class="admin-tab-content" id="atab2">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-style:italic">Estado del sistema y diagnóstico</div>
+        <div class="sys-row" style="margin-bottom:6px;background:rgba(45,122,58,.08);border-color:rgba(45,122,58,.2);"><span style="color:var(--text-dark);font-size:11px">Tótem</span><span style="color:#3d9e4e;font-weight:500;font-size:11px">Operativo</span></div>
+        <div class="sys-row" style="margin-bottom:6px;background:rgba(45,122,58,.08);border-color:rgba(45,122,58,.2);"><span style="color:var(--text-dark);font-size:11px">Versión</span><span style="color:#3d9e4e;font-weight:500;font-size:11px">v3.0 — 24 mejoras</span></div>
+        <div class="sys-row" style="background:rgba(45,122,58,.08);border-color:rgba(45,122,58,.2);"><span style="color:var(--text-dark);font-size:11px">WIS Agency</span><span style="color:#3d9e4e;font-weight:500;font-size:11px">Soporte activo</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ M15 NOTIFICACIONES ══ -->
+<div id="notif-overlay" onclick="closeNotif()"></div>
+<div id="notif-panel">
+  <div class="notif-header">
+    <div class="notif-header-title">Notificaciones</div>
+    <button class="notif-close-btn" onclick="closeNotif()">×</button>
+  </div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-item verde" onclick="markNotifRead(this)"><div class="notif-item-text">Tu cuota de abril fue acreditada</div><div class="notif-item-time">Hoy 09:14</div></div>
+    <div class="notif-item azul" onclick="markNotifRead(this)"><div class="notif-item-text">Estás inscripto en Copa 2 de Abril — Sábado 22/04</div><div class="notif-item-time">Ayer 18:30</div></div>
+    <div class="notif-item verde" onclick="markNotifRead(this)"><div class="notif-item-text">Tu handicap se actualizó: 12.4 → 12.1</div><div class="notif-item-time">21 Abr</div></div>
+    <div class="notif-item naranja" onclick="markNotifRead(this)"><div class="notif-item-text">Nuevo torneo disponible: Copa Otoño 2026</div><div class="notif-item-time">20 Abr</div></div>
+  </div>
+</div>
+
+<!-- ══ M12 CREDENCIAL DIGITAL ══ -->
+<div id="credencial-modal">
+  <div class="cred-card">
+    <div class="cred-pattern"></div>
+    <img class="cred-logo" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/escudo.png" alt="">
+    <div class="cred-club">Mar del Plata Golf Club · Socio Activo</div>
+    <div class="cred-divider"></div>
+    <div class="cred-name" id="credNombre">Roberto Castillo</div>
+    <div class="cred-matricula" id="credMatricula">MATRÍCULA · #4821</div>
+    <div class="cred-stats-row">
+      <div class="cred-stat"><div class="cred-stat-lbl">Handicap</div><div class="cred-stat-val" id="credHcp">12.4</div></div>
+      <div class="cred-stat"><div class="cred-stat-lbl">Categoría</div><div class="cred-stat-val">A</div></div>
+      <div class="cred-stat"><div class="cred-stat-lbl">Rondas 2026</div><div class="cred-stat-val" id="credRondas">28</div></div>
+    </div>
+    <div class="cred-qr-wrap"><img id="credQrImg" src="" alt="QR"></div>
+    <div class="cred-vence">Membresía válida hasta 31/12/2026</div>
+    <div class="cred-actions">
+      <button class="cred-btn" onclick="closeCredencial()">Cerrar</button>
+      <button class="cred-btn primary" onclick="compartirCredencial()">Compartir</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ M23 MAPA SVG ══ -->
+<div id="mapa-overlay">
+  <div class="mapa-box">
+    <div class="mapa-bar">
+      <div class="mapa-title">Mapa del Club — <span id="mapaCanchaLabel">Cancha Vieja</span></div>
+      <button class="mapa-close-btn" onclick="closeMapa()">×</button>
+    </div>
+    <div class="mapa-svg-wrap">
+      <svg id="mapaSvg" viewBox="0 0 400 320" width="100%" style="display:block;background:#0d1f14;border-radius:0 0 8px 8px;">
+        <!-- Background grass -->
+        <rect x="0" y="0" width="400" height="320" fill="#0d1f14"/>
+        <!-- Clubhouse -->
+        <rect x="170" y="140" width="60" height="40" rx="4" fill="#1a3d24" stroke="#c4a862" stroke-width="1.5"/>
+        <text x="200" y="156" text-anchor="middle" fill="#c4a862" font-size="7" font-family="Cinzel">CLUB</text>
+        <text x="200" y="168" text-anchor="middle" fill="#c4a862" font-size="7" font-family="Cinzel">HOUSE</text>
+        <!-- Fairways (simplified) -->
+        <ellipse cx="80" cy="60" rx="35" ry="20" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="180" cy="40" rx="30" ry="18" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="300" cy="55" rx="35" ry="20" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="350" cy="140" rx="30" ry="25" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="330" cy="250" rx="35" ry="20" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="200" cy="290" rx="30" ry="18" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="70" cy="265" rx="35" ry="20" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <ellipse cx="40" cy="175" rx="25" ry="30" fill="#1a4a22" stroke="#2d7a3a" stroke-width="1" opacity=".8"/>
+        <!-- Tee markers (bocas) -->
+        <g id="mapa-bocas"></g>
+        <!-- Points of interest -->
+        <rect x="260" y="130" width="44" height="18" rx="3" fill="#1a3d24" stroke="#c4a862" stroke-width=".8"/>
+        <text x="282" y="142" text-anchor="middle" fill="#c4a862" font-size="6.5" font-family="sans-serif">Pro Shop</text>
+        <rect x="130" y="192" width="44" height="18" rx="3" fill="#1a3d24" stroke="#c4a862" stroke-width=".8"/>
+        <text x="152" y="204" text-anchor="middle" fill="#c4a862" font-size="6.5" font-family="sans-serif">Restaurante</text>
+        <!-- North arrow -->
+        <text x="375" y="20" text-anchor="middle" fill="rgba(255,255,255,.3)" font-size="9" font-family="Cinzel">N</text>
+        <path d="M375 24 L371 34 L375 30 L379 34 Z" fill="rgba(255,255,255,.3)"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ══ M24 WIS SUPPORT ══ -->
+<button id="wis-fab" onclick="toggleWisChat()"><div class="wis-fab-inner">W</div></button>
+<div id="wis-chat-panel">
+  <div class="wis-panel-hdr">
+    <div class="wis-panel-title">Soporte WIS Agency</div>
+    <button class="wis-panel-close" onclick="toggleWisChat()">×</button>
+  </div>
+  <div class="wis-msgs" id="wisMsgs">
+    <div class="wis-msg bot">Hola, soy el asistente de soporte de WIS Agency para Club Manager Pro. ¿En qué te puedo ayudar?</div>
+  </div>
+  <div class="wis-input-row">
+    <input class="wis-input" id="wisInput" placeholder="Escribí tu consulta..." onkeydown="if(event.key==='Enter')sendWisMsg()">
+    <button class="wis-send" onclick="sendWisMsg()">Enviar</button>
+  </div>
+</div>
+
+<!-- ══ M5 PRINT TICKET ══ -->
+<div id="print-ticket">
+  <div class="pt-center pt-bold pt-big">MAR DEL PLATA GOLF CLUB</div>
+  <div class="pt-center" style="font-size:9px;letter-spacing:2px">COMPROBANTE DE GREEN FEE</div>
+  <div class="pt-div"></div>
+  <div class="pt-row"><span>Socio:</span><span id="pt-socio"></span></div>
+  <div class="pt-row"><span>Fecha:</span><span id="pt-fecha"></span></div>
+  <div class="pt-row"><span>Boca de salida:</span><span id="pt-boca"></span></div>
+  <div class="pt-row"><span>Handicap juego:</span><span id="pt-hcp"></span></div>
+  <div class="pt-row"><span>Formato:</span><span id="pt-formato"></span></div>
+  <div class="pt-row"><span>Precio:</span><span id="pt-precio"></span></div>
+  <div class="pt-row"><span>Comprobante N°:</span><span id="pt-numero"></span></div>
+  <div class="pt-div"></div>
+  <div class="pt-barcode" id="pt-barcode"></div>
+  <div class="pt-div"></div>
+  <div class="pt-center" style="font-size:9px">Club Manager Pro · WIS Agency</div>
+  <div class="pt-center" style="font-size:8px;margin-top:4px">www.wisagency.com</div>
+</div>
+
 <div id="app">
 
 <!-- ══════════════════════════════════════ HEADER -->
 <header class="hdr">
   <div class="hdr-left">
-    <img class="hdr-escudo" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/escudo.png" alt="Escudo MDPGC" onerror="this.style.display='none'">
+    <img class="hdr-escudo" id="hdrEscudo" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/escudo.png" alt="Escudo MDPGC" onerror="this.style.display='none'" style="cursor:pointer">
     <div class="hdr-text">
       <div class="club-name">Mar del Plata Golf Club</div>
-      <div class="club-sub">Club Manager Pro · Cancha Vieja</div>
+      <div class="club-sub" id="hdrSub">Club Manager Pro</div>
     </div>
   </div>
   <div class="hdr-right">
+    <div class="weather-compact" id="weatherCompact" title="Clima Mar del Plata">
+      <span class="wt-icon" id="wtIcon">⛅</span>
+      <span class="wt-temp" id="wtTemp">--°</span>
+    </div>
     <div class="clock-wrap">
       <div class="clock-time" id="clockTime">--:--</div>
       <div class="clock-date" id="clockDate">---</div>
     </div>
-    <button class="hdr-btn" onclick="go('dashboard')">Panel Gerencial</button>
-    <button class="hdr-btn" onclick="go('carrusel')">Cerrar Sesión</button>
+    <div class="notif-bell" id="notifBell" onclick="openNotif()" style="display:none">
+      🔔<span class="notif-badge" id="notifBadge">4</span>
+    </div>
+    <button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="Modo oscuro">🌙</button>
+    <button class="cancha-change-btn" onclick="go('cancha','back')" id="canchaChangeBtn" style="display:none">Cambiar cancha</button>
+    <button class="hdr-btn" onclick="go('dashboard','forward')">Panel Gerencial</button>
+    <button class="hdr-btn" onclick="go('carrusel','forward')">Cerrar Sesión</button>
   </div>
 </header>
 
+<!-- ══════════════════════════════════════ CANCHA SELECTION (M10) -->
+<div class="screen" id="screen-cancha">
+  <div class="cancha-hero">
+    <img class="cancha-hero-escudo" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/escudo.png" alt="" onerror="this.style.display='none'">
+    <div class="cancha-hero-title">¿En qué cancha jugás hoy?</div>
+    <div class="cancha-hero-sub">Seleccioná para personalizar tu experiencia</div>
+  </div>
+  <div class="cancha-btn" onclick="selectCancha('vieja')">
+    <div class="cancha-icon">⛳</div>
+    <div>
+      <div class="cancha-btn-title">Cancha Vieja</div>
+      <div class="cancha-btn-sub">Playa Grande · Links escocés · 18 hoyos</div>
+      <div class="cancha-btn-tag">Par 70/72 · Slope 113 · Bocas 1-4-7-10-13-16</div>
+    </div>
+  </div>
+  <div class="cancha-btn" onclick="selectCancha('nueva')">
+    <div class="cancha-icon">🏌️</div>
+    <div>
+      <div class="cancha-btn-title">Cancha Nueva</div>
+      <div class="cancha-btn-sub">Mario Bravo · 50 hectáreas arboladas · 18 hoyos</div>
+      <div class="cancha-btn-tag">Par 71/73 · Slope 118 · Bocas 1-4-7-10-13-16-18</div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════ HOME -->
-<div class="screen active" id="screen-home">
+<div class="screen" id="screen-home">
   <div class="home-hero">
     <img class="home-hero-img" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/club2.jpg" alt="Club" onerror="this.style.background='var(--bg-light)'">
     <div class="home-hero-shade"></div>
@@ -550,10 +764,11 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
       <div class="home-club">Mar del Plata Golf Club · La Catedral del Golf</div>
       <div class="home-rule"></div>
       <div class="home-title">Bienvenido a <em>Club Manager Pro</em></div>
+      <div id="homeBienvenida" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:6px;font-style:italic;display:none"></div>
     </div>
   </div>
   <div class="home-cards">
-    <div class="hcard c-gold" onclick="go('socio-dni')">
+    <div class="hcard c-gold" onclick="go('socio-dni','back')">
       <div class="hcard-num">01</div>
       <div class="hcard-icon ic-g">
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="9" r="4" stroke="#c4a862" stroke-width="1.4"/><path d="M5 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#c4a862" stroke-width="1.4" stroke-linecap="round"/></svg>
@@ -562,7 +777,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
       <div class="hcard-desc">Golfistics, green fee<br>y servicios del club</div>
       <div class="hcard-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 6.5h7M7.5 4l3 2.5-3 2.5" stroke="#c4a862" stroke-width="1.2" stroke-linecap="round"/></svg></div>
     </div>
-    <div class="hcard c-blue" onclick="go('invitado')">
+    <div class="hcard c-blue" onclick="go('invitado','back')">
       <div class="hcard-num">02</div>
       <div class="hcard-icon ic-b">
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="9" r="4" stroke="#6496e0" stroke-width="1.4"/><path d="M5 22c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#6496e0" stroke-width="1.4" stroke-linecap="round"/><path d="M20 7l2.5 2.5-2.5 2.5" stroke="#6496e0" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -571,7 +786,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
       <div class="hcard-desc">Registro inmediato<br>y green fee</div>
       <div class="hcard-arrow"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 6.5h7M7.5 4l3 2.5-3 2.5" stroke="#6496e0" stroke-width="1.2" stroke-linecap="round"/></svg></div>
     </div>
-    <div class="hcard c-teal" onclick="go('cargar-tarjeta')">
+    <div class="hcard c-teal" onclick="go('cargar-tarjeta','back')">
       <div class="hcard-num">03</div>
       <div class="hcard-icon ic-t">
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="5" y="8" width="16" height="10" rx="2" stroke="#40a080" stroke-width="1.4"/><path d="M9 12h8M9 15h5" stroke="#40a080" stroke-width="1.2" stroke-linecap="round"/><path d="M18 4l1.5 4" stroke="#40a080" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -585,7 +800,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ SOCIO DNI -->
 <div class="screen has-back" id="screen-socio-dni">
-  <button class="back" onclick="go('home')">← Volver</button>
+  <button class="back" onclick="go('home','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Acceso de socios</div><div class="sh-title">Ingresá tu DNI</div><div class="divgold"></div><div class="sh-sub">Teclado numérico en pantalla</div></div>
   <div class="kp-wrap">
     <div class="kp-display"><div class="kp-lbl">Número de DNI</div><div class="kp-val"><span id="dniText"></span><div class="kp-cursor"></div></div></div>
@@ -600,7 +815,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ SOCIO PERFIL -->
 <div class="screen has-back" id="screen-socio-perfil">
-  <button class="back" onclick="go('socio-dni')">← Volver</button>
+  <button class="back" onclick="go('socio-dni','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Bienvenido</div><div class="sh-title" id="profileGreeting">Hola, Roberto</div><div class="divgold"></div></div>
   <div class="profile-card">
     <div class="pc-head">
@@ -616,21 +831,71 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
   <div class="act-grid">
     <div class="act-card" onclick="openGolfistics()">
       <div class="act-icon ai-g"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="#c4a862" stroke-width="1.3"/><path d="M3 18c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#c4a862" stroke-width="1.3" stroke-linecap="round"/></svg></div>
-      <div><div class="act-title">Golfistics</div><div class="act-sub">Reservas, torneos, stats</div></div>
+      <div><div class="act-title">Golfistics</div><div class="act-sub">Torneos y stats</div></div>
     </div>
-    <div class="act-card" onclick="go('secretaria')">
+    <div class="act-card" onclick="go('secretaria','forward')">
       <div class="act-icon ai-b"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="#6496e0" stroke-width="1.3"/><path d="M7 9h6M7 12h4" stroke="#6496e0" stroke-width="1.2" stroke-linecap="round"/></svg></div>
       <div><div class="act-title">Secretaría</div><div class="act-sub">Green fee, cuenta, cuota</div></div>
+    </div>
+    <div class="act-card" onclick="openCredencial()" style="grid-column:span 1">
+      <div class="act-icon" style="background:rgba(196,168,98,.1);">🪪</div>
+      <div><div class="act-title">Credencial</div><div class="act-sub">Ver tarjeta digital</div></div>
+    </div>
+    <div class="act-card" onclick="go('reservas','forward')" style="grid-column:span 1">
+      <div class="act-icon" style="background:rgba(45,122,58,.08);">📅</div>
+      <div><div class="act-title">Reservar turno</div><div class="act-sub">Demo de reservas</div></div>
+    </div>
+  </div>
+
+  <!-- M16 Weather card -->
+  <div class="weather-card" id="weatherCardSocio" style="display:none">
+    <div class="wc-row">
+      <div class="wc-icon-big" id="wcIconBig">⛅</div>
+      <div>
+        <div class="wc-temp-big" id="wcTempBig">--°C</div>
+        <div class="wc-detail" id="wcDetail">Cargando clima...</div>
+      </div>
+    </div>
+    <div class="wc-msg" id="wcMsg"></div>
+  </div>
+
+  <!-- M3 Historial de rondas -->
+  <div class="historial-wrap">
+    <div class="historial-title">Últimas rondas</div>
+    <div class="ronda-card"><div class="ronda-left"><div class="ronda-fecha">18 Abr 2026</div><div class="ronda-torneo">Copa 2 de Abril</div><div class="ronda-cancha">Cancha Vieja</div></div><div class="ronda-score">82</div></div>
+    <div class="ronda-card"><div class="ronda-left"><div class="ronda-fecha">12 Abr 2026</div><div class="ronda-torneo">Vuelta libre</div><div class="ronda-cancha">Cancha Nueva</div></div><div class="ronda-score">79</div></div>
+    <div class="ronda-card"><div class="ronda-left"><div class="ronda-fecha">05 Abr 2026</div><div class="ronda-torneo">Torneo Semanal</div><div class="ronda-cancha">Cancha Vieja</div></div><div class="ronda-score">85</div></div>
+    <div class="ronda-card"><div class="ronda-left"><div class="ronda-fecha">28 Mar 2026</div><div class="ronda-torneo">Vuelta libre</div><div class="ronda-cancha">Cancha Nueva</div></div><div class="ronda-score">81</div></div>
+    <div class="ronda-card"><div class="ronda-left"><div class="ronda-fecha">21 Mar 2026</div><div class="ronda-torneo">Copa Otoño</div><div class="ronda-cancha">Cancha Vieja</div></div><div class="ronda-score">88</div></div>
+  </div>
+
+  <!-- M14 Estadísticas personales -->
+  <div class="stats-toggle" id="statsToggle" onclick="toggleStats()">
+    <span class="stats-toggle-label">Mis estadísticas 2026</span>
+    <span class="stats-toggle-arrow">▼</span>
+  </div>
+  <div class="stats-body" id="statsBody">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-item-lbl">Promedio 30 días</div><div class="stat-item-val">82.6</div></div>
+      <div class="stat-item"><div class="stat-item-lbl">Mejor ronda 2026</div><div class="stat-item-val">74</div></div>
+      <div class="stat-item"><div class="stat-item-lbl">Rondas 2026</div><div class="stat-item-val">28</div></div>
+      <div class="stat-item"><div class="stat-item-lbl">Handicap trend</div><div class="stat-item-val">12.1 <span class="stat-trend" style="color:#3d9e4e">↓</span></div></div>
+      <div class="stat-item"><div class="stat-item-lbl">Hoyo favorito</div><div class="stat-item-val">Hoyo 7</div></div>
+      <div class="stat-item"><div class="stat-item-lbl">Cancha preferida</div><div class="stat-item-val">Vieja</div></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">Puntajes — últimas 8 rondas</div>
+      <div class="chart-bars" id="statsChart"></div>
     </div>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ SECRETARÍA -->
 <div class="screen has-back" id="screen-secretaria">
-  <button class="back" onclick="go('socio-perfil')">← Volver</button>
+  <button class="back" onclick="go('socio-perfil','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Servicios del club</div><div class="sh-title">Secretaría</div><div class="divgold"></div></div>
   <div class="sec-list">
-    <div class="sec-item" onclick="go('gf-tipo')">
+    <div class="sec-item" onclick="go('gf-tipo','back')">
       <div class="sec-left"><div class="sec-ico"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="14" cy="5" r="2" fill="#c4a862"/><path d="M14 5v11" stroke="#c4a862" stroke-width="1" stroke-dasharray="2,2"/><path d="M11 16h6" stroke="#c4a862" stroke-width="1.4" stroke-linecap="round"/><path d="M3 16Q7 8 11 11" stroke="#c4a862" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></div><div><div class="sec-lbl">Sacar Green Fee</div><div class="sec-sub">Habilitación de cancha y tarjeta</div></div></div>
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7h6M7.5 4.5l3 2.5-3 2.5" stroke="#c4a862" stroke-width="1.2" stroke-linecap="round"/></svg>
     </div>
@@ -647,7 +912,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ GF: TIPO -->
 <div class="screen has-back" id="screen-gf-tipo">
-  <button class="back" onclick="go('secretaria')">← Volver</button>
+  <button class="back" onclick="go('secretaria','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Green Fee</div><div class="sh-title">¿Jugás en torneo?</div><div class="divgold"></div></div>
   <div class="cg cg2" style="max-width:480px">
     <div class="cb" onclick="gfSetTipo(true,this)">
@@ -665,7 +930,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ GF: TORNEO INFO -->
 <div class="screen has-back" id="screen-gf-torneo">
-  <button class="back" onclick="go('gf-tipo')">← Volver</button>
+  <button class="back" onclick="go('gf-tipo','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Torneo del día</div><div class="sh-title">Copa 2 de Abril</div><div class="divgold"></div></div>
   <div class="torneo-card">
     <div class="tc-head">
@@ -681,12 +946,12 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
   </div>
   <div class="section-eye mt12">Seleccioná tu boca de salida</div>
   <div class="salida-grid" id="salidaGrid"></div>
-  <button class="btn-p mt20" id="btnTorneoOk" disabled onclick="go('gf-pago')">Continuar al pago</button>
+  <button class="btn-p mt20" id="btnTorneoOk" disabled onclick="go('gf-pago','forward')">Continuar al pago</button>
 </div>
 
 <!-- ══════════════════════════════════════ GF: PRÁCTICA -->
 <div class="screen has-back" id="screen-gf-practica">
-  <button class="back" onclick="go('gf-tipo')">← Volver</button>
+  <button class="back" onclick="go('gf-tipo','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Vuelta de Práctica</div><div class="sh-title">¿Querés tarjeta?</div><div class="divgold"></div></div>
   <div class="cg cg2" style="max-width:480px">
     <div class="cb" onclick="pracSetTarjeta(true,this)">
@@ -705,10 +970,10 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ GF: ELIGE TEE + SALIDA (práctica con tarjeta) -->
 <div class="screen has-back" id="screen-gf-tee">
-  <button class="back" onclick="go('gf-practica')">← Volver</button>
+  <button class="back" onclick="go('gf-practica','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Vuelta de Práctica</div><div class="sh-title">Elegí tu boca de salida</div><div class="divgold"></div></div>
   <div class="salida-grid" id="salidaGridPrac"></div>
-  <button class="btn-p mt20" id="btnTeeOk" disabled onclick="go('gf-pago')">Continuar al pago</button>
+  <button class="btn-p mt20" id="btnTeeOk" disabled onclick="go('gf-pago','forward')">Continuar al pago</button>
 </div>
 
 <!-- ══════════════════════════════════════ GF: PAGO -->
@@ -732,9 +997,9 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
   </div>
   <div class="pago-methods">
     <div class="pm-btn" onclick="showQr(S.socio?S.socio.nombre:'Socio', document.getElementById('gfAmount').textContent, 'Green Fee')"><div class="pm-ico">📱</div><div><div>Pagar con QR</div><div class="pm-sub">Mercado Pago · Modo · Cualquier billetera</div></div></div>
-    <div class="pm-btn" onclick="go('gf-success')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
-    <div class="pm-btn" onclick="go('gf-success')"><div class="pm-ico">🏦</div><div><div>Débito automático CBU</div><div class="pm-sub">Adherite para cobros futuros automáticos</div></div></div>
-    <div class="pm-btn" onclick="go('gf-success')"><div class="pm-ico">📋</div><div><div>Cuenta corriente</div><div class="pm-sub">Cargar a mi cuenta · Se descuenta del saldo disponible</div></div></div>
+    <div class="pm-btn" onclick="go('gf-success','forward')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
+    <div class="pm-btn" onclick="go('gf-success','forward')"><div class="pm-ico">🏦</div><div><div>Débito automático CBU</div><div class="pm-sub">Adherite para cobros futuros automáticos</div></div></div>
+    <div class="pm-btn" onclick="go('gf-success','forward')"><div class="pm-ico">📋</div><div><div>Cuenta corriente</div><div class="pm-sub">Cargar a mi cuenta · Se descuenta del saldo disponible</div></div></div>
   </div>
 </div>
 
@@ -746,12 +1011,14 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="badge-sync"><div class="badge-dot"></div>Tarjeta impresa</div>
     <div class="success-detail" id="gfSuccessDetail">Roberto Castillo · Boca 1 · 18 hoyos<br>Handicap de juego: 12 · Medal Play<br>Pago acreditado automáticamente</div>
     <button class="btn-p" onclick="showMas('socio')" style="max-width:300px">Finalizar</button>
+    <button class="btn-s" onclick="imprimirGreenFee()" style="max-width:300px">🖨️ Imprimir comprobante</button>
+    <button class="btn-s" onclick="descargarPDF('green-fee')" style="max-width:300px">⬇️ Descargar PDF</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ ESTADO DE CUENTA -->
 <div class="screen has-back" id="screen-estado-cuenta">
-  <button class="back" onclick="go('secretaria')">← Volver</button>
+  <button class="back" onclick="go('secretaria','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Secretaría</div><div class="sh-title">Estado de Cuenta</div><div class="divgold"></div></div>
   <div class="cuenta-card">
     <div class="cc-head">
@@ -766,12 +1033,12 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="cc-row"><span class="cc-key">Green fees del mes</span><span class="cc-val">$25.500</span></div>
     <div class="cc-row"><span class="cc-key">Crédito disponible</span><span class="cc-val pos">$15.000</span></div>
   </div>
-  <button class="btn-s" onclick="go('secretaria')">Volver a secretaría</button>
+  <button class="btn-s" onclick="go('secretaria','back')">Volver a secretaría</button>
 </div>
 
 <!-- ══════════════════════════════════════ PAGAR CUOTA -->
 <div class="screen has-back" id="screen-pagar-cuota">
-  <button class="back" onclick="go('secretaria')">← Volver</button>
+  <button class="back" onclick="go('secretaria','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Secretaría</div><div class="sh-title">Pagar Cuota</div><div class="divgold"></div></div>
   <div class="pago-box">
     <div class="pago-concept">Cuota mensual · Abril 2026</div>
@@ -780,9 +1047,9 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
   </div>
   <div class="pago-methods">
     <div class="pm-btn" onclick="showQr('Roberto Castillo','$85.000','Cuota mensual Abril 2026')"><div class="pm-ico">📱</div><div><div>Pagar con QR</div><div class="pm-sub">Mercado Pago · Modo · Cualquier billetera</div></div></div>
-    <div class="pm-btn" onclick="go('cuota-success')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
-    <div class="pm-btn" onclick="go('cuota-success')"><div class="pm-ico">🏦</div><div><div>Débito automático CBU</div><div class="pm-sub">Adherite para cobros futuros sin pasar por el tótem</div></div></div>
-    <div class="pm-btn" onclick="go('cuota-success')"><div class="pm-ico">📋</div><div><div>Cuenta corriente</div><div class="pm-sub">Cargar a mi cuenta · Se descuenta del saldo disponible</div></div></div>
+    <div class="pm-btn" onclick="go('cuota-success','forward')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
+    <div class="pm-btn" onclick="go('cuota-success','forward')"><div class="pm-ico">🏦</div><div><div>Débito automático CBU</div><div class="pm-sub">Adherite para cobros futuros sin pasar por el tótem</div></div></div>
+    <div class="pm-btn" onclick="go('cuota-success','forward')"><div class="pm-ico">📋</div><div><div>Cuenta corriente</div><div class="pm-sub">Cargar a mi cuenta · Se descuenta del saldo disponible</div></div></div>
   </div>
 </div>
 
@@ -794,12 +1061,13 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="badge-sync"><div class="badge-dot"></div>Acreditado en sistema</div>
     <div class="success-detail">Abril 2026 · $85.000<br>Comprobante enviado al email registrado</div>
     <button class="btn-p" onclick="showMas('socio')" style="max-width:300px">Finalizar</button>
+    <button class="btn-s" onclick="descargarPDF('cuota')" style="max-width:300px">⬇️ Descargar comprobante</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ INVITADO (flujo por pasos) -->
 <div class="screen has-back" id="screen-invitado">
-  <button class="back" onclick="go('home')">← Volver</button>
+  <button class="back" onclick="go('home','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Acceso de invitados</div><div class="sh-title" id="invTitle">Ingresá tu DNI</div><div class="divgold"></div></div>
   <div class="inv-progress full-w"><div class="inv-progress-fill" id="invProgress" style="width:16%"></div></div>
   <div class="inv-question" id="invQuestion">
@@ -827,7 +1095,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ INVITADO PAGO -->
 <div class="screen has-back" id="screen-invitado-pago">
-  <button class="back" onclick="go('invitado')">← Volver</button>
+  <button class="back" onclick="go('invitado','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Invitado</div><div class="sh-title">Abonar ingreso</div><div class="divgold"></div></div>
   <div class="pago-box">
     <div class="pago-concept">Arancel de visita</div>
@@ -836,7 +1104,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
   </div>
   <div class="pago-methods">
     <div class="pm-btn" onclick="showQr(S.invData.nombre||'Invitado', document.getElementById('invPagoAmount').textContent, 'Arancel de visita')"><div class="pm-ico">📱</div><div><div>Pagar con QR</div><div class="pm-sub">Mercado Pago · Modo · Cualquier billetera</div></div></div>
-    <div class="pm-btn" onclick="go('invitado-success')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
+    <div class="pm-btn" onclick="go('invitado-success','forward')"><div class="pm-ico">💳</div><div><div>Terminal de cobro</div><div class="pm-sub">Débito · Crédito · Contactless</div></div></div>
   </div>
 </div>
 
@@ -848,27 +1116,121 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="badge-sync"><div class="badge-dot"></div>Registrado en sistema</div>
     <div class="success-detail" id="invSuccessDetail">Invitado registrado<br>Pago acreditado · Tarjeta impresa</div>
     <button class="btn-p" onclick="showMas('invitado')" style="max-width:300px">Finalizar</button>
+    <button class="btn-s" onclick="descargarPDF('invitado')" style="max-width:300px">⬇️ Descargar comprobante</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ M13 PASE INVITADO -->
+<div class="screen has-back" id="screen-invitado-pase">
+  <button class="back" onclick="go('invitado','back')">← Volver</button>
+  <div class="sh"><div class="sh-eye">Pase de Invitado</div><div class="sh-title">Tu acceso al club</div><div class="divgold"></div></div>
+  <div class="pase-card">
+    <div class="pase-header">
+      <div class="pase-header-club">Mar del Plata Golf Club</div>
+      <div class="pase-header-title">Pase de Invitado</div>
+    </div>
+    <div class="pase-numero" id="paseNumero">#007</div>
+    <div class="pase-body">
+      <div class="pase-row"><span class="pase-lbl">Nombre</span><span class="pase-val" id="paseNombre">—</span></div>
+      <div class="pase-row"><span class="pase-lbl">Club de origen</span><span class="pase-val" id="paseClub">—</span></div>
+      <div class="pase-row"><span class="pase-lbl">Cancha</span><span class="pase-val" id="paseCancha">Cancha Vieja</span></div>
+      <div class="pase-row"><span class="pase-lbl">Fecha y hora</span><span class="pase-val" id="paseFecha">—</span></div>
+      <div class="pase-qr"><img id="paseQr" src="" alt="QR" style="width:100%;height:100%;object-fit:contain;"></div>
+      <div class="pase-row"><span class="pase-lbl">Estado</span><span class="pase-val" style="color:#3d9e4e">Registrado ✓</span></div>
+    </div>
+  </div>
+  <button class="btn-p" style="max-width:400px" onclick="go('invitado-pago','forward')">Continuar al pago →</button>
+  <button class="btn-s" style="max-width:400px" onclick="compartirPase()">Compartir pase</button>
+</div>
+
+<!-- ══════════════════════════════════════ M22 ONBOARDING -->
+<div class="screen has-back" id="screen-onboarding">
+  <button class="back" onclick="go('socio-dni','back')">← Volver</button>
+  <div class="sh"><div class="sh-eye">DNI no encontrado</div><div class="sh-title">No encontramos tu DNI</div><div class="divgold"></div><div class="sh-sub">¿Qué querés hacer?</div></div>
+  <div class="onboard-opts">
+    <div class="onboard-opt" onclick="go('onboarding-registro','forward')">
+      <div class="onboard-opt-icon">📝</div>
+      <div><div class="onboard-opt-title">Soy socio nuevo</div><div class="onboard-opt-sub">Iniciá tu pre-registro en el club</div></div>
+    </div>
+    <div class="onboard-opt" onclick="go('invitado','forward')">
+      <div class="onboard-opt-icon">🚶</div>
+      <div><div class="onboard-opt-title">Ingresar como invitado</div><div class="onboard-opt-sub">Green fee de visita</div></div>
+    </div>
+    <div class="onboard-opt" onclick="alert('Secretaría: (0223) 451-2300\nLunes a viernes 8:00 a 17:00')">
+      <div class="onboard-opt-icon">📞</div>
+      <div><div class="onboard-opt-title">Tengo un error con mi DNI</div><div class="onboard-opt-sub">Contactar a secretaría</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ M22 PRE-REGISTRO -->
+<div class="screen has-back" id="screen-onboarding-registro">
+  <button class="back" onclick="go('onboarding','back')">← Volver</button>
+  <div class="sh"><div class="sh-eye">Socio nuevo</div><div class="sh-title">Pre-registro</div><div class="divgold"></div></div>
+  <div style="width:100%;max-width:480px">
+    <div class="admin-field"><label>Nombre completo</label><input type="text" id="ob-nombre" placeholder="Tu nombre y apellido" style="background:#fff;color:var(--text-dark);border:1px solid var(--border);border-radius:8px;width:100%;padding:10px 12px;font-size:13px;outline:none"></div>
+    <div class="admin-field"><label>Email</label><input type="email" id="ob-email" placeholder="correo@ejemplo.com" style="background:#fff;color:var(--text-dark);border:1px solid var(--border);border-radius:8px;width:100%;padding:10px 12px;font-size:13px;outline:none"></div>
+    <div class="admin-field"><label>Teléfono</label><input type="tel" id="ob-tel" placeholder="(0223) ..." style="background:#fff;color:var(--text-dark);border:1px solid var(--border);border-radius:8px;width:100%;padding:10px 12px;font-size:13px;outline:none"></div>
+    <div class="admin-field"><label>Club de origen (si viene transferido)</label><input type="text" id="ob-club" placeholder="Opcional" style="background:#fff;color:var(--text-dark);border:1px solid var(--border);border-radius:8px;width:100%;padding:10px 12px;font-size:13px;outline:none"></div>
+    <button class="btn-p" onclick="submitOnboarding()">Enviar solicitud</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ M19 RESERVAS -->
+<div class="screen has-back" id="screen-reservas">
+  <button class="back" onclick="go('socio-perfil','back')">← Volver</button>
+  <div class="sh"><div class="sh-eye">Sistema de reservas</div><div class="sh-title">Reservar turno</div><div class="divgold"></div><div class="sh-sub" style="color:#d48c30">Demo — sujeto a confirmación de secretaría</div></div>
+  <div style="font-family:var(--cinzel);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;width:100%;max-width:540px">Seleccioná fecha</div>
+  <div class="res-dates" id="resDates"></div>
+  <div style="font-family:var(--cinzel);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;width:100%;max-width:540px" id="resTimeLbl" style="display:none">Seleccioná horario</div>
+  <div class="res-time-grid" id="resTimeGrid"></div>
+  <button class="btn-p" style="max-width:480px" id="btnReservaOk" disabled onclick="go('reservas-confirm','forward')">Confirmar reserva →</button>
+</div>
+
+<!-- ══════════════════════════════════════ M19 RESERVA CONFIRM -->
+<div class="screen has-back" id="screen-reservas-confirm">
+  <button class="back" onclick="go('reservas','back')">← Volver</button>
+  <div class="sh"><div class="sh-eye">Confirmar reserva</div><div class="sh-title">Resumen</div><div class="divgold"></div></div>
+  <div class="res-confirm-box">
+    <div class="res-confirm-row"><span class="rcl">Socio</span><span class="rcv" id="rcSocio">Roberto Castillo</span></div>
+    <div class="res-confirm-row"><span class="rcl">Fecha</span><span class="rcv" id="rcFecha">—</span></div>
+    <div class="res-confirm-row"><span class="rcl">Horario</span><span class="rcv" id="rcHora">—</span></div>
+    <div class="res-confirm-row"><span class="rcl">Cancha</span><span class="rcv" id="rcCancha">Cancha Vieja</span></div>
+    <div class="res-confirm-row"><span class="rcl">Estado</span><span class="rcv" style="color:#d48c30">Pendiente de confirmación</span></div>
+  </div>
+  <button class="btn-p" style="max-width:480px" onclick="go('reservas-success','forward')">Reservar turno</button>
+  <button class="btn-s" style="max-width:480px" onclick="go('reservas','back')">Cambiar horario</button>
+</div>
+
+<!-- ══════════════════════════════════════ M19 RESERVA SUCCESS -->
+<div class="screen" id="screen-reservas-success">
+  <div class="success-wrap">
+    <div class="success-ring"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><polyline points="9,19 16,26 27,11" stroke="#4caf81" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="success-title">Turno reservado</div>
+    <div class="badge-sync"><div class="badge-dot"></div>Enviando confirmación</div>
+    <div class="success-detail" id="resSuccessDetail">Tu reserva fue registrada.<br>Recibirás confirmación por email.<br><em>Sujeto a confirmación de secretaría.</em></div>
+    <button class="btn-p" onclick="go('socio-perfil','back')" style="max-width:300px">Volver al perfil</button>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ CARGAR TARJETA -->
 <div class="screen has-back" id="screen-cargar-tarjeta">
-  <button class="back" onclick="go('home')">← Volver</button>
+  <button class="back" onclick="go('home','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Post ronda</div><div class="sh-title">Cargar Tarjeta</div><div class="divgold"></div><div class="sh-sub">Insertá tu tarjeta en la ranura inferior del tótem</div></div>
-  <div style="width:100%;max-width:460px;background:var(--white);border:2px dashed var(--border2);border-radius:var(--rl);padding:44px 28px;text-align:center;cursor:pointer;position:relative;overflow:hidden;margin-bottom:20px" onclick="go('ct-dni')">
+  <div style="width:100%;max-width:460px;background:var(--white);border:2px dashed var(--border2);border-radius:var(--rl);padding:44px 28px;text-align:center;cursor:pointer;position:relative;overflow:hidden;margin-bottom:20px" onclick="go('ct-dni','back')">
     <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:scanLine 2.5s ease-in-out infinite;opacity:.6"></div>
     <svg style="margin:0 auto 14px;display:block" width="52" height="52" viewBox="0 0 52 52" fill="none"><rect x="13" y="10" width="26" height="32" rx="3" stroke="#c4a862" stroke-width="1.4"/><path d="M19 19h14M19 24h14M19 29h8" stroke="#c4a862" stroke-width="1.2" stroke-linecap="round"/><path d="M26 42v6M23 45h6" stroke="#40a080" stroke-width="1.4" stroke-linecap="round"/></svg>
     <div style="font-family:var(--serif);font-size:20px;color:var(--text-dark);margin-bottom:6px">Ranura de tarjetas</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.6;font-style:italic">El sistema lee automáticamente los puntajes<br>con reconocimiento óptico (OCR)</div>
   </div>
-  <button class="btn-p" style="max-width:460px" onclick="go('ct-dni')">Simular inserción</button>
-  <button class="btn-s" onclick="go('home')">Cancelar</button>
+  <button class="btn-p" style="max-width:460px" onclick="go('ct-dni','back')">Simular inserción</button>
+  <button class="btn-s" onclick="go('home','back')">Cancelar</button>
 </div>
 <style>@keyframes scanLine{0%{top:15%}50%{top:80%}100%{top:15%}}</style>
 
 <!-- ══════════════════════════════════════ CT: DNI -->
 <div class="screen has-back" id="screen-ct-dni">
-  <button class="back" onclick="go('cargar-tarjeta')">← Volver</button>
+  <button class="back" onclick="go('cargar-tarjeta','back')">← Volver</button>
   <div class="sh"><div class="sh-eye">Cargar tarjeta</div><div class="sh-title">Ingresá tu DNI</div><div class="divgold"></div><div class="sh-sub">Para asociar los puntajes a tu perfil</div></div>
   <div class="kp-wrap">
     <div class="kp-display"><div class="kp-lbl">Número de DNI</div><div class="kp-val"><span id="ctDniText"></span><div class="kp-cursor"></div></div></div>
@@ -883,7 +1245,7 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ CT: SCORES -->
 <div class="screen has-back" id="screen-ct-scores">
-  <button class="back" onclick="go('ct-dni')">← Volver</button>
+  <button class="back" onclick="go('ct-dni','back')">← Volver</button>
   <div class="sh" style="padding-top:20px"><div class="sh-eye">Verificación OCR</div><div class="sh-title">Revisá tu tarjeta</div><div class="divgold"></div><div class="sh-sub">Tocá cualquier número para corregirlo</div></div>
   <div class="sg-wrap">
     <div class="sg-head"><div class="sg-title" id="sgTitle">Roberto Castillo · Ronda #038 · Copa 2 de Abril</div><div class="sg-badge">OCR completado</div></div>
@@ -902,8 +1264,8 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     </div>
     <div class="sg-total"><div class="sg-total-lbl">Total</div><div class="sg-total-val" id="sgTotal">82 golpes</div></div>
   </div>
-  <button class="btn-p" style="max-width:540px" onclick="go('ct-sync')">Confirmar y presentar tarjeta</button>
-  <button class="btn-s" style="max-width:540px" onclick="go('cargar-tarjeta')">Reinsertar tarjeta</button>
+  <button class="btn-p" style="max-width:540px" onclick="go('ct-sync','forward')">Confirmar y presentar tarjeta</button>
+  <button class="btn-s" style="max-width:540px" onclick="go('cargar-tarjeta','back')">Reinsertar tarjeta</button>
 </div>
 
 <!-- ══════════════════════════════════════ CT: SYNC -->
@@ -931,18 +1293,19 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 
 <!-- ══════════════════════════════════════ DASHBOARD -->
 <div class="screen" id="screen-dashboard">
-  <button class="back" onclick="go('home')" style="border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.35)">← Salir</button>
+  <button class="back" onclick="go('home','back')" style="border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.35)">← Salir</button>
   <div class="dash-top">
     <div class="dash-title">Panel Gerencial</div>
-    <div class="dash-live"><div class="live-dot"></div>En vivo · Hoy</div>
+    <div class="dash-live"><div class="live-dot"></div>En vivo · <span id="dashCountdown">60s</span></div>
   </div>
-  <div class="dash-tabs">
+  <div class="dash-tabs" style="flex-wrap:wrap">
     <button class="dash-tab active" onclick="dashTab(0,this)">Operaciones</button>
     <button class="dash-tab" onclick="dashTab(1,this)">Canchas</button>
     <button class="dash-tab" onclick="dashTab(2,this)">Socios</button>
     <button class="dash-tab" onclick="dashTab(3,this)">Sistema</button>
     <button class="dash-tab" onclick="dashTab(4,this)">Analítica IA</button>
     <button class="dash-tab" onclick="dashTab(5,this)">Extras</button>
+    <button class="dash-tab" onclick="dashTab(6,this)">Leaderboard</button>
   </div>
 
   <!-- Tab 0: Operaciones -->
@@ -1017,9 +1380,12 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
       <div class="dm"><div class="dm-lbl">Pagos de cuota</div><div class="dm-val">6</div><div class="dm-delta">en tótem</div></div>
       <div class="dm"><div class="dm-lbl">Acceso Golfistics</div><div class="dm-val">31</div><div class="dm-delta muted">desde tótem</div></div>
     </div>
-    <div class="dash-sec-title">Alertas</div>
-    <div class="alert-row"><div class="alert-dot"></div>11 socios sin cuota de mayo · Vencimiento en 8 días</div>
-    <div class="alert-row" style="margin-top:8px"><div class="alert-dot"></div>4 tarjetas de torneo pendientes de presentar</div>
+    <div class="dash-sec-title">Alertas <span style="font-size:9px;color:rgba(255,255,255,.2)">(tocá para resolver)</span></div>
+    <div id="alertasContainer">
+      <div class="alert-row" onclick="toggleAlert(this)" style="cursor:pointer"><div class="alert-dot"></div>11 socios sin cuota de mayo · Vencimiento en 8 días</div>
+      <div class="alert-row" onclick="toggleAlert(this)" style="margin-top:8px;cursor:pointer"><div class="alert-dot"></div>4 tarjetas de torneo pendientes de presentar</div>
+    </div>
+    <button class="alert-add-btn" onclick="nuevaAlerta()">+ Nueva alerta</button>
   </div>
 
   <!-- Tab 3: Sistema -->
@@ -1031,7 +1397,16 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
     <div class="sys-row" style="margin-top:8px"><span class="sys-lbl">Impresora térmica</span><span class="sys-val">Operativa · Papel OK</span></div>
     <div class="sys-row" style="margin-top:8px"><span class="sys-lbl">Lector OCR</span><span class="sys-val">Operativo · Calibrado</span></div>
     <div class="sys-row" style="margin-top:8px"><span class="sys-lbl">Conexión AAG</span><span class="sys-val">Sincronizado</span></div>
-    <div class="dash-sec-title">Informe por WhatsApp</div>
+    <div class="dash-sec-title" style="margin-top:14px">Analytics de uso</div>
+    <div id="analyticsContainer">
+      <div class="analytics-stat"><span class="an-lbl">Pantalla más visitada</span><span class="an-val" id="anPantalla">—</span></div>
+      <div class="analytics-stat"><span class="an-lbl">Interacciones totales</span><span class="an-val" id="anTotal">0</span></div>
+      <div class="analytics-stat"><span class="an-lbl">Pagos simulados</span><span class="an-val" id="anPagos">0</span></div>
+      <div class="analytics-stat"><span class="an-lbl">Check-ins de socios</span><span class="an-val" id="anCheckins">0</span></div>
+      <div class="analytics-stat"><span class="an-lbl">Errores de DNI</span><span class="an-val" id="anDniErr" style="color:var(--warn)">0</span></div>
+      <div class="analytics-stat"><span class="an-lbl">Sesión iniciada</span><span class="an-val" id="anSesion">—</span></div>
+    </div>
+    <div class="dash-sec-title" style="margin-top:14px">Informe por WhatsApp</div>
     <div style="background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.15);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px">
       <div style="font-size:12px;color:rgba(255,255,255,.5)">Generá un informe automático con IA y envialo por WhatsApp o Mail</div>
       <textarea id="wppTema" placeholder="Describí qué querés comunicar (ej: compramos maquinaria nueva, resultados del torneo de hoy...)" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;color:#f5f0e8;font-family:var(--sans);font-size:12px;resize:none;height:72px;outline:none"></textarea>
@@ -1089,10 +1464,28 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
       </div>
     </div>
   </div>
+
+  <!-- Tab 6: Leaderboard (M11) -->
+  <div class="dash-panel" id="dtab6">
+    <div class="dash-sec-title">Torneo del día — <span id="lbTorneoNombre">Copa 2 de Abril</span></div>
+    <div class="lb-filter">
+      <button class="lb-filter-btn active" onclick="lbFilter('todos',this)">Todos</button>
+      <button class="lb-filter-btn" onclick="lbFilter('A',this)">Cat A</button>
+      <button class="lb-filter-btn" onclick="lbFilter('B',this)">Cat B</button>
+      <button class="lb-filter-btn" onclick="lbFilter('C',this)">Cat C</button>
+    </div>
+    <button class="lb-refresh" id="lbRefreshBtn" onclick="lbRefresh()"><span id="lbRefreshIcon">↻</span> Actualizar leaderboard</button>
+    <div style="overflow-x:auto;width:100%">
+      <table class="lb-table" id="lbTable">
+        <thead><tr><th>#</th><th>Jugador</th><th>Cat</th><th>Bruto</th><th>HCP</th><th>Neto</th><th>Dif</th></tr></thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════ CARRUSEL CIERRE -->
-<div class="screen" id="screen-carrusel" onclick="go('home')">
+<div class="screen" id="screen-carrusel" onclick="go('home','back')">
   <div class="carrusel-wrap">
     <img class="carrusel-img" id="cr0" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/club1.jpg" alt="">
     <img class="carrusel-img" id="cr1" src="https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/club3.jpg" alt="">
@@ -1142,9 +1535,341 @@ html,body{width:100%;height:100%;background:var(--bg-light);color:var(--text-dar
 <style>
 .dash-quick-q{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 12px;color:rgba(255,255,255,.5);font-family:var(--sans);font-size:10px;cursor:pointer;transition:all .2s;text-align:left;}
 .dash-quick-q:hover{background:rgba(196,168,98,.1);border-color:rgba(196,168,98,.25);color:var(--gold);}
+
+/* ══ M1 SPLASH ══ */
+#splash-screen{position:fixed;inset:0;z-index:9999;background:#0d1f14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s ease;}
+#splash-screen.hidden{opacity:0;pointer-events:none;}
+.splash-escudo{width:96px;height:96px;object-fit:contain;animation:splashPop .5s ease;}
+@keyframes splashPop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.splash-club{font-family:var(--cinzel);font-size:15px;letter-spacing:.25em;color:#c4a862;text-transform:uppercase;margin-top:4px;}
+.splash-sub{font-family:'Cormorant Garamond',serif;font-size:17px;font-style:italic;color:rgba(255,255,255,.75);}
+.splash-bar-wrap{width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:12px;}
+.splash-bar{height:100%;width:0;background:linear-gradient(90deg,#2d7a3a,#5bbf6e);border-radius:2px;transition:width 2.4s linear;}
+
+/* ══ M4 DIRECTIONAL TRANSITIONS ══ */
+.screen.active{display:flex;}
+.screen.slide-fwd{animation:slideInR .28s cubic-bezier(.4,0,.2,1);}
+.screen.slide-bck{animation:slideInL .28s cubic-bezier(.4,0,.2,1);}
+@keyframes slideInR{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInL{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+
+/* ══ M7 DARK MODE ══ */
+body.dark-mode{background:#0d1f14;}
+body.dark-mode .screen{background:#0d1f14;}
+body.dark-mode .hdr{background:#112819;border-color:rgba(45,122,58,.3);}
+body.dark-mode .hdr-text .club-name,body.dark-mode .clock-time{color:#f5f0e8;}
+body.dark-mode .hcard,body.dark-mode .act-card,body.dark-mode .sec-item,body.dark-mode .cb,body.dark-mode .profile-card,body.dark-mode .pago-box,body.dark-mode .hcp-box,body.dark-mode .cuenta-card,body.dark-mode .torneo-card,body.dark-mode .kp-display,body.dark-mode .salida-btn{background:#112819;border-color:rgba(45,122,58,.35);}
+body.dark-mode .kk{background:#1a3d24;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+body.dark-mode .kk.ok{background:#2d7a3a;color:#fff;}
+body.dark-mode .mk-box{background:#112819;}
+body.dark-mode .mk-key{background:#1a3d24;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+body.dark-mode .sh-title,body.dark-mode .pc-name,body.dark-mode .hcard-label,body.dark-mode .act-title,body.dark-mode .sec-lbl,body.dark-mode .cb-label,body.dark-mode .pago-amount,body.dark-mode .hcp-num{color:#f5f0e8;}
+body.dark-mode .back{background:#1a3d24;border-color:rgba(45,122,58,.4);color:#a8c8b0;}
+body.dark-mode .btn-s{border-color:rgba(45,122,58,.4);color:#a8c8b0;}
+body.dark-mode .pm-btn{background:#112819;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+body.dark-mode .mas-box,body.dark-mode .qr-box,body.dark-mode .info-box{background:#112819;}
+body.dark-mode .mas-title,body.dark-mode .qr-name,body.dark-mode .qr-amount,body.dark-mode .info-box-sub{color:#f5f0e8;}
+body.dark-mode .cc-row{border-color:rgba(45,122,58,.2);}
+body.dark-mode .cc-key{color:#7a9a82;}
+body.dark-mode .cc-val{color:#f5f0e8;}
+body.dark-mode .pc-head{background:linear-gradient(135deg,rgba(45,122,58,.15),#112819);}
+body.dark-mode .sg-wrap{background:#112819;}
+body.dark-mode .golf-bar{background:#112819;}
+body.dark-mode .wis-chat-box{background:#112819;}
+
+/* ══ M9 SCREENSAVER ══ */
+#screensaver-overlay{display:none;position:fixed;inset:0;z-index:8000;background:rgba(13,31,20,.92);flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+#screensaver-overlay.open{display:flex;animation:mkIn .4s ease;}
+.ss-escudo{width:80px;height:80px;object-fit:contain;opacity:.7;}
+.ss-msg{font-family:'Cormorant Garamond',serif;font-size:22px;color:#f5f0e8;text-align:center;max-width:300px;line-height:1.5;}
+.ss-counter{font-family:var(--cinzel);font-size:48px;color:#c4a862;letter-spacing:4px;}
+.ss-btn{background:#2d7a3a;border:none;color:#fff;font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:14px 32px;border-radius:10px;cursor:pointer;margin-top:8px;}
+
+/* ══ M2 ADMIN PIN ══ */
+#admin-overlay{display:none;position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
+#admin-overlay.open{display:flex;}
+.admin-box{background:#fff;border-radius:20px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+body.dark-mode .admin-box{background:#112819;}
+.admin-header{background:#0d1f14;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;}
+.admin-title{font-family:var(--cinzel);font-size:12px;letter-spacing:.3em;color:#c4a862;text-transform:uppercase;}
+.admin-close{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;}
+.admin-body{padding:24px;}
+.admin-pin-display{font-family:var(--serif);font-size:36px;letter-spacing:12px;text-align:center;color:var(--navy);padding:16px;background:var(--bg-light);border-radius:10px;margin-bottom:16px;min-height:58px;}
+body.dark-mode .admin-pin-display{background:#1a3d24;color:#f5f0e8;}
+.admin-pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.admin-pin-key{background:var(--bg-light);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--serif);font-size:22px;color:var(--text-dark);cursor:pointer;text-align:center;transition:all .15s;}
+body.dark-mode .admin-pin-key{background:#1a3d24;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+.admin-pin-key:active{transform:scale(.95);background:rgba(45,122,58,.1);}
+.admin-err{color:var(--danger);font-size:12px;text-align:center;margin-top:6px;min-height:16px;}
+/* Admin panel */
+.admin-panel{display:none;padding:0;}
+.admin-panel.open{display:block;}
+.admin-tabs{display:flex;border-bottom:1px solid var(--border);}
+.admin-tab{flex:1;padding:10px;background:transparent;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .2s;border-bottom:2px solid transparent;}
+.admin-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+body.dark-mode .admin-tab.active{color:#5bbf6e;border-bottom-color:#5bbf6e;}
+.admin-tab-content{display:none;padding:20px;}
+.admin-tab-content.active{display:block;}
+.admin-field{margin-bottom:14px;}
+.admin-field label{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.admin-field input,.admin-field select,.admin-field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:13px;color:var(--text-dark);background:var(--bg-light);outline:none;}
+body.dark-mode .admin-field input,body.dark-mode .admin-field select,body.dark-mode .admin-field textarea{background:#1a3d24;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+.admin-save{width:100%;padding:13px;background:#0d1f14;color:#fff;border:none;border-radius:10px;font-family:var(--sans);font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-top:4px;}
+/* Admin search */
+.admin-search-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:13px;margin-bottom:12px;outline:none;background:var(--bg-light);color:var(--text-dark);}
+body.dark-mode .admin-search-input{background:#1a3d24;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+.admin-search-result{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+.admin-search-result:hover{background:rgba(45,122,58,.06);}
+.asr-name{font-family:var(--serif);font-size:16px;color:var(--text-dark);}
+body.dark-mode .asr-name{color:#f5f0e8;}
+.asr-detail{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ══ M10 CANCHA SELECTION ══ */
+#screen-cancha{justify-content:center;padding:20px;}
+.cancha-hero{text-align:center;margin-bottom:32px;}
+.cancha-hero-escudo{width:64px;height:64px;object-fit:contain;margin-bottom:12px;}
+.cancha-hero-title{font-family:var(--serif);font-size:28px;color:var(--text-dark);margin-bottom:6px;}
+.cancha-hero-sub{font-size:12px;color:var(--muted);font-style:italic;}
+body.dark-mode .cancha-hero-title{color:#f5f0e8;}
+.cancha-btn{width:100%;max-width:480px;background:#fff;border:2px solid var(--border);border-radius:18px;padding:28px 24px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:20px;transition:all .3s;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.cancha-btn:hover{border-color:var(--navy);transform:translateY(-2px);box-shadow:0 8px 28px rgba(45,122,58,.15);}
+body.dark-mode .cancha-btn{background:#112819;border-color:rgba(45,122,58,.3);}
+.cancha-icon{width:56px;height:56px;border-radius:14px;background:rgba(45,122,58,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:26px;}
+.cancha-btn-title{font-family:var(--serif);font-size:22px;color:var(--text-dark);margin-bottom:4px;}
+body.dark-mode .cancha-btn-title{color:#f5f0e8;}
+.cancha-btn-sub{font-size:11px;color:var(--muted);}
+.cancha-btn-tag{font-family:var(--cinzel);font-size:9px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;margin-top:4px;}
+
+/* ══ M3 HISTORIAL RONDAS ══ */
+.historial-wrap{width:100%;max-width:540px;margin-top:8px;}
+.historial-title{font-family:var(--cinzel);font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.ronda-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+body.dark-mode .ronda-card{background:#112819;border-color:rgba(45,122,58,.25);}
+.ronda-left .ronda-fecha{font-size:11px;color:var(--muted);margin-bottom:2px;}
+.ronda-left .ronda-torneo{font-family:var(--serif);font-size:15px;color:var(--text-dark);}
+body.dark-mode .ronda-left .ronda-torneo{color:#f5f0e8;}
+.ronda-left .ronda-cancha{font-size:10px;color:var(--muted);margin-top:1px;}
+.ronda-score{font-family:var(--serif);font-size:24px;color:var(--navy);font-weight:300;}
+body.dark-mode .ronda-score{color:#5bbf6e;}
+
+/* ══ M14 ESTADÍSTICAS ══ */
+.stats-toggle{width:100%;max-width:540px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin-top:10px;transition:all .25s;}
+body.dark-mode .stats-toggle{background:#112819;border-color:rgba(45,122,58,.3);}
+.stats-toggle-label{font-family:var(--cinzel);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);}
+.stats-toggle-arrow{font-size:14px;color:var(--muted);transition:transform .3s;}
+.stats-toggle.open .stats-toggle-arrow{transform:rotate(180deg);}
+.stats-body{display:none;width:100%;max-width:540px;background:#fff;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:16px 18px;}
+body.dark-mode .stats-body{background:#112819;border-color:rgba(45,122,58,.3);}
+.stats-body.open{display:block;animation:slideInR .25s ease;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat-item{background:var(--bg-light);border-radius:8px;padding:10px 12px;}
+body.dark-mode .stat-item{background:#1a3d24;}
+.stat-item-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.stat-item-val{font-family:var(--serif);font-size:20px;color:var(--text-dark);}
+body.dark-mode .stat-item-val{color:#f5f0e8;}
+.stat-trend{display:inline-block;font-size:13px;margin-left:4px;}
+.chart-wrap{margin-top:8px;}
+.chart-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:64px;}
+.chart-bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;}
+.chart-bar{background:linear-gradient(to top,#2d7a3a,#5bbf6e);border-radius:3px 3px 0 0;width:100%;transition:height .5s ease;}
+.chart-bar-num{font-size:9px;color:var(--muted);}
+
+/* ══ M12 CREDENCIAL DIGITAL ══ */
+#credencial-modal{display:none;position:fixed;inset:0;z-index:6000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:20px;}
+#credencial-modal.open{display:flex;}
+.cred-card{width:100%;max-width:420px;background:linear-gradient(135deg,#0d1f14,#1a3d24);border:1px solid rgba(196,168,98,.3);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden;}
+.cred-pattern{position:absolute;inset:0;opacity:.04;background-image:repeating-linear-gradient(45deg,#c4a862 0,#c4a862 1px,transparent 0,transparent 50%);background-size:14px 14px;}
+.cred-logo{width:52px;height:52px;object-fit:contain;margin:0 auto 10px;display:block;}
+.cred-club{font-family:var(--cinzel);font-size:10px;letter-spacing:.3em;color:rgba(196,168,98,.8);text-align:center;margin-bottom:16px;}
+.cred-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(196,168,98,.4),transparent);margin:12px 0;}
+.cred-name{font-family:'Cormorant Garamond',serif;font-size:28px;color:#f5f0e8;text-align:center;margin-bottom:4px;}
+.cred-matricula{font-family:var(--cinzel);font-size:11px;letter-spacing:.4em;color:#c4a862;text-align:center;margin-bottom:16px;}
+.cred-stats-row{display:flex;justify-content:space-around;margin-bottom:16px;}
+.cred-stat{text-align:center;}
+.cred-stat-lbl{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:3px;}
+.cred-stat-val{font-family:'Cormorant Garamond',serif;font-size:20px;color:#f5f0e8;}
+.cred-qr-wrap{width:120px;height:120px;background:#fff;border-radius:8px;margin:0 auto 14px;overflow:hidden;padding:4px;}
+.cred-qr-wrap img{width:100%;height:100%;}
+.cred-vence{font-size:9px;letter-spacing:.15em;color:rgba(255,255,255,.35);text-align:center;margin-bottom:16px;}
+.cred-actions{display:flex;gap:10px;}
+.cred-btn{flex:1;padding:11px;border-radius:8px;border:1px solid rgba(196,168,98,.3);background:transparent;color:#c4a862;font-family:var(--sans);font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.cred-btn:hover{background:rgba(196,168,98,.1);}
+.cred-btn.primary{background:rgba(196,168,98,.15);}
+
+/* ══ M15 NOTIFICACIONES ══ */
+#notif-panel{display:none;position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);z-index:5500;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.15);flex-direction:column;}
+body.dark-mode #notif-panel{background:#112819;}
+#notif-panel.open{display:flex;animation:slideNotif .28s ease;}
+@keyframes slideNotif{from{transform:translateX(100%)}to{transform:translateX(0)}}
+#notif-overlay{display:none;position:fixed;inset:0;z-index:5499;background:rgba(0,0,0,.4);}
+#notif-overlay.open{display:block;}
+.notif-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.notif-header-title{font-family:var(--cinzel);font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--navy);}
+body.dark-mode .notif-header-title{color:#5bbf6e;}
+.notif-close-btn{background:transparent;border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;}
+.notif-list{flex:1;overflow-y:auto;padding:12px;}
+.notif-item{padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .2s;border-left:3px solid;}
+.notif-item.verde{border-left-color:#3d9e4e;background:rgba(61,158,78,.06);}
+.notif-item.azul{border-left-color:#4070e0;background:rgba(64,112,224,.06);}
+.notif-item.naranja{border-left-color:#d48c30;background:rgba(212,140,48,.06);}
+.notif-item.read{opacity:.45;}
+.notif-item-text{font-size:12px;color:var(--text-dark);line-height:1.5;}
+body.dark-mode .notif-item-text{color:#f5f0e8;}
+.notif-item-time{font-size:10px;color:var(--muted);margin-top:3px;}
+.notif-bell{position:relative;cursor:pointer;padding:4px;}
+.notif-badge{position:absolute;top:-2px;right:-2px;background:#e05050;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:600;}
+
+/* ══ M16 CLIMA ══ */
+.weather-compact{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:default;}
+.weather-compact .wt-icon{font-size:16px;}
+.weather-compact .wt-temp{font-family:var(--serif);font-size:15px;color:var(--text-dark);}
+body.dark-mode .weather-compact .wt-temp{color:#f5f0e8;}
+.weather-card{width:100%;max-width:540px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:12px;}
+body.dark-mode .weather-card{background:#112819;border-color:rgba(45,122,58,.3);}
+.wc-row{display:flex;align-items:center;gap:14px;}
+.wc-icon-big{font-size:40px;}
+.wc-temp-big{font-family:var(--serif);font-size:42px;color:var(--text-dark);}
+body.dark-mode .wc-temp-big{color:#f5f0e8;}
+.wc-detail{font-size:12px;color:var(--muted);margin-top:4px;}
+.wc-msg{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);font-style:italic;}
+
+/* ══ M11 LEADERBOARD ══ */
+.lb-filter{display:flex;gap:8px;margin-bottom:14px;}
+.lb-filter-btn{padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.4);font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.lb-filter-btn.active{background:rgba(45,122,58,.25);border-color:rgba(45,122,58,.5);color:#5bbf6e;}
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:8px 6px;text-align:left;border-bottom:1px solid rgba(255,255,255,.07);}
+.lb-table td{padding:8px 6px;font-size:12px;color:rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.04);}
+.lb-table tr.leader td{background:rgba(196,168,98,.06);color:#f5f0e8;}
+.lb-pos{font-family:var(--cinzel);font-size:13px;font-weight:600;}
+.lb-pos.gold{color:#c4a862;}
+.lb-nombre{font-family:'Cormorant Garamond',serif;font-size:15px;}
+.lb-cat{display:inline-block;width:20px;height:20px;border-radius:50%;background:rgba(45,122,58,.3);color:#5bbf6e;font-size:10px;font-weight:600;text-align:center;line-height:20px;}
+.lb-refresh{background:rgba(45,122,58,.15);border:1px solid rgba(45,122,58,.35);color:#5bbf6e;font-family:var(--sans);font-size:10px;letter-spacing:.15em;text-transform:uppercase;padding:9px 18px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .2s;margin-bottom:12px;}
+.lb-refresh:hover{background:rgba(45,122,58,.25);}
+.lb-spin{display:inline-block;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ M5 PRINT ══ */
+#print-ticket{display:none;}
+@media print{
+  body > *:not(#print-ticket){display:none!important;}
+  #print-ticket{display:block;width:80mm;margin:0 auto;font-family:monospace;font-size:11px;color:#000;}
+  .pt-center{text-align:center;}
+  .pt-bold{font-weight:700;}
+  .pt-big{font-size:15px;}
+  .pt-div{border-top:1px dashed #000;margin:6px 0;}
+  .pt-row{display:flex;justify-content:space-between;margin:2px 0;}
+  .pt-barcode{display:flex;justify-content:center;gap:2px;margin:8px auto;}
+  .pt-bar{background:#000;height:32px;}
+}
+
+/* ══ M6 ALERTAS VIVO ══ */
+.alert-row.resolved{opacity:.4;text-decoration:line-through;cursor:pointer;}
+.dash-countdown{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.1em;text-align:right;margin-bottom:6px;}
+.alert-add-btn{background:rgba(212,140,48,.1);border:1px solid rgba(212,140,48,.25);color:var(--warn);font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;border-radius:8px;cursor:pointer;margin-top:8px;width:100%;}
+
+/* ══ M13 PASE INVITADO ══ */
+.pase-card{width:100%;max-width:400px;background:#fff;border:2px solid var(--border2);border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 4px 24px rgba(0,0,0,.1);}
+.pase-header{background:#0d1f14;padding:18px 20px;text-align:center;}
+.pase-header-club{font-family:var(--cinzel);font-size:9px;letter-spacing:.28em;color:#c4a862;margin-bottom:4px;}
+.pase-header-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:#fff;font-style:italic;}
+.pase-numero{font-family:var(--cinzel);font-size:28px;color:#c4a862;text-align:center;padding:16px 0 0;}
+.pase-body{padding:0 20px 16px;}
+.pase-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.pase-row:last-child{border-bottom:none;}
+.pase-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+.pase-val{font-size:13px;color:var(--text-dark);font-weight:500;}
+.pase-qr{margin:12px auto;width:100px;height:100px;background:var(--bg-light);border-radius:8px;overflow:hidden;}
+.pase-qr img{width:100%;height:100%;}
+
+/* ══ M22 ONBOARDING ══ */
+.onboard-opts{width:100%;max-width:480px;display:flex;flex-direction:column;gap:12px;}
+.onboard-opt{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:16px;transition:all .25s;}
+body.dark-mode .onboard-opt{background:#112819;border-color:rgba(45,122,58,.3);}
+.onboard-opt:hover{border-color:var(--navy);transform:translateY(-2px);}
+.onboard-opt-icon{font-size:24px;width:44px;text-align:center;flex-shrink:0;}
+.onboard-opt-title{font-family:var(--serif);font-size:18px;color:var(--text-dark);}
+body.dark-mode .onboard-opt-title{color:#f5f0e8;}
+.onboard-opt-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ══ M19 RESERVAS ══ */
+.res-dates{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:20px;width:100%;max-width:540px;}
+.res-date-btn{flex-shrink:0;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:#fff;cursor:pointer;text-align:center;transition:all .2s;min-width:64px;}
+body.dark-mode .res-date-btn{background:#112819;border-color:rgba(45,122,58,.3);}
+.res-date-btn.sel{border-color:var(--navy);background:rgba(45,122,58,.08);}
+.res-date-day{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.res-date-num{font-family:var(--serif);font-size:20px;color:var(--text-dark);}
+body.dark-mode .res-date-num{color:#f5f0e8;}
+.res-time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:100%;max-width:540px;margin-bottom:20px;}
+.res-time-btn{padding:9px 4px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;text-align:center;font-size:11px;color:var(--text-dark);transition:all .2s;}
+body.dark-mode .res-time-btn{background:#112819;color:#f5f0e8;border-color:rgba(45,122,58,.3);}
+.res-time-btn.sel{border-color:var(--navy);background:rgba(45,122,58,.08);font-weight:500;}
+.res-time-btn.taken{background:var(--bg-light);color:var(--muted);cursor:not-allowed;opacity:.5;}
+body.dark-mode .res-time-btn.taken{background:#1a3d24;}
+.res-confirm-box{width:100%;max-width:480px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:16px;}
+body.dark-mode .res-confirm-box{background:#112819;border-color:rgba(45,122,58,.3);}
+.res-confirm-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.res-confirm-row:last-child{border-bottom:none;}
+.rcl{font-size:11px;color:var(--muted);}
+.rcv{font-family:var(--serif);font-size:15px;color:var(--text-dark);}
+body.dark-mode .rcv{color:#f5f0e8;}
+
+/* ══ M20 MODO QUIOSCO ══ */
+body.kiosk-mode{cursor:none;}
+
+/* ══ M23 MAPA SVG ══ */
+#mapa-overlay{display:none;position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:16px;}
+#mapa-overlay.open{display:flex;}
+.mapa-box{background:#0d1f14;border:1px solid rgba(45,122,58,.4);border-radius:16px;width:100%;max-width:500px;overflow:hidden;}
+.mapa-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid rgba(45,122,58,.3);}
+.mapa-bar-title{font-family:var(--cinzel);font-size:10px;letter-spacing:.25em;color:#c4a862;}
+.mapa-close-btn{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;}
+.mapa-svg-wrap{padding:16px;overflow:auto;}
+
+/* ══ M24 WIS SUPPORT ══ */
+#wis-fab{position:fixed;bottom:24px;right:24px;z-index:4500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0d1f14,#1a3d24);border:2px solid rgba(196,168,98,.5);cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:all .25s;}
+#wis-fab.visible{display:flex;}
+#wis-fab:hover{transform:scale(1.08);}
+.wis-fab-inner{font-family:var(--cinzel);font-size:18px;color:#c4a862;font-weight:600;}
+#wis-chat-panel{display:none;position:fixed;top:0;right:0;bottom:0;width:min(380px,100vw);z-index:4600;flex-direction:column;background:#0a1410;border-left:1px solid rgba(45,122,58,.3);}
+#wis-chat-panel.open{display:flex;animation:slideNotif .28s ease;}
+.wis-panel-hdr{padding:16px 18px;border-bottom:1px solid rgba(45,122,58,.2);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.wis-panel-title{font-family:var(--cinzel);font-size:10px;letter-spacing:.25em;color:#c4a862;}
+.wis-panel-close{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:15px;}
+.wis-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
+.wis-msg{max-width:88%;padding:10px 13px;border-radius:12px;font-size:12px;line-height:1.6;}
+.wis-msg.user{background:rgba(45,122,58,.2);border:1px solid rgba(45,122,58,.35);color:#c8e6c0;align-self:flex-end;border-radius:12px 12px 3px 12px;}
+.wis-msg.bot{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.8);align-self:flex-start;border-radius:12px 12px 12px 3px;}
+.wis-input-row{display:flex;border-top:1px solid rgba(45,122,58,.2);flex-shrink:0;}
+.wis-input{flex:1;background:transparent;border:none;color:#f5f0e8;font-family:var(--sans);font-size:12px;padding:12px 14px;outline:none;}
+.wis-input::placeholder{color:rgba(255,255,255,.25);}
+.wis-send{background:#2d7a3a;border:none;color:#fff;font-family:var(--sans);font-size:10px;letter-spacing:.15em;text-transform:uppercase;padding:12px 16px;cursor:pointer;}
+
+/* ══ M21 ANALYTICS ══ */
+.analytics-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+.an-lbl{color:rgba(255,255,255,.35);}
+.an-val{color:#5bbf6e;font-weight:500;}
+
+/* ══ M8 HAPTIC (visual feedback) ══ */
+.kk:active,.mk-key:active,.admin-pin-key:active{transform:scale(.94);}
+
+/* ══ DARK MODE TOGGLE BTN ══ */
+.dm-toggle{background:transparent;border:1px solid var(--border);width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .25s;flex-shrink:0;}
+.dm-toggle:hover{border-color:var(--border2);}
+/* Cambiar cancha btn */
+.cancha-change-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--sans);font-size:9px;letter-spacing:.15em;text-transform:uppercase;padding:6px 10px;border-radius:6px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.cancha-change-btn:hover{border-color:var(--border2);color:var(--text-dark);}
+body.dark-mode .cancha-change-btn{color:#7a9a82;border-color:rgba(45,122,58,.3);}
 </style>
 
 <script>
+/* ══════════════════════════════════════════════
+   CLUB MANAGER PRO — v3.0 · 24 mejoras
+   WIS Agency · Mar del Plata Golf Club
+══════════════════════════════════════════════ */
+
 /* ── CONFIG ── */
 const OPENAI_API_KEY = 'sk-REEMPLAZAR-CON-TU-KEY';
 const IMG_BASE = 'https://raw.githubusercontent.com/ortugonzalez/club-manager-1/main/img/';
@@ -1171,7 +1896,73 @@ const S = {
   invStep:0, invData:{},
   carruselIdx:0, carruselTimer:null,
   dashTabIdx:0,
+  cancha:'vieja',
+  adminPin:'',
+  adminUnlocked:false,
+  resSelectedDate:'',
+  resSelectedHora:'',
+  darkForced:null,
+  weather:null,
+  inactivityTimer:null,
+  screensaverTimer:null,
+  ssCounter:60,
+  dashLiveTimer:null,
+  dashCountdownSec:60,
+  adminClickCount:0,
+  adminClickTimer:null,
 };
+
+/* ── ANALYTICS ── */
+const ANALYTICS = JSON.parse(localStorage.getItem('cm_analytics')||'{"visits":{},"payments":0,"checkins":0,"dniErrors":0,"startTime":'+Date.now()+'}');
+function saveAnalytics(){localStorage.setItem('cm_analytics',JSON.stringify(ANALYTICS));}
+function trackScreen(id){
+  ANALYTICS.visits[id]=(ANALYTICS.visits[id]||0)+1;
+  saveAnalytics();
+}
+function trackPayment(){ANALYTICS.payments++;saveAnalytics();}
+function trackCheckin(){ANALYTICS.checkins++;saveAnalytics();}
+function trackDniError(){ANALYTICS.dniErrors++;saveAnalytics();}
+function updateAnalyticsUI(){
+  const visits=ANALYTICS.visits;
+  const top=Object.entries(visits).sort((a,b)=>b[1]-a[1])[0];
+  const el=id=>document.getElementById(id);
+  if(el('anPantalla')) el('anPantalla').textContent=top?top[0].replace('screen-',''):' — ';
+  if(el('anTotal')) el('anTotal').textContent=Object.values(visits).reduce((a,b)=>a+b,0);
+  if(el('anPagos')) el('anPagos').textContent=ANALYTICS.payments;
+  if(el('anCheckins')) el('anCheckins').textContent=ANALYTICS.checkins;
+  if(el('anDniErr')) el('anDniErr').textContent=ANALYTICS.dniErrors;
+  if(el('anSesion')){
+    const d=new Date(ANALYTICS.startTime);
+    el('anSesion').textContent=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+  }
+}
+
+/* ── LEADERBOARD DATA (M11) ── */
+const LB_DATA = [
+  {pos:1,nombre:'Roberto Castillo',cat:'A',bruto:76,hcp:12,neto:64},
+  {pos:2,nombre:'Carlos Méndez',cat:'A',bruto:74,hcp:6,neto:68},
+  {pos:3,nombre:'Pablo Ruiz',cat:'B',bruto:88,hcp:20,neto:68},
+  {pos:4,nombre:'Gustavo Molina',cat:'C',bruto:92,hcp:24,neto:68},
+  {pos:5,nombre:'Andrés López',cat:'B',bruto:85,hcp:16,neto:69},
+  {pos:6,nombre:'Martín García',cat:'B',bruto:87,hcp:18,neto:69},
+  {pos:7,nombre:'Oscar Herrera',cat:'C',bruto:95,hcp:26,neto:69},
+  {pos:8,nombre:'Miguel Torres',cat:'A',bruto:78,hcp:8,neto:70},
+  {pos:9,nombre:'Luis Fernández',cat:'A',bruto:80,hcp:10,neto:70},
+  {pos:10,nombre:'Diego Ramos',cat:'A',bruto:77,hcp:7,neto:70},
+  {pos:11,nombre:'Fernando Silva',cat:'B',bruto:90,hcp:22,neto:68},
+  {pos:12,nombre:'Jorge Vidal',cat:'C',bruto:98,hcp:28,neto:70},
+  {pos:13,nombre:'Ricardo Paz',cat:'B',bruto:86,hcp:17,neto:69},
+  {pos:14,nombre:'Eduardo Pérez',cat:'C',bruto:96,hcp:26,neto:70},
+  {pos:15,nombre:'Alberto Sosa',cat:'C',bruto:100,hcp:30,neto:70},
+];
+
+/* ── HAPTIC (M8) ── */
+function haptic(type='tap'){
+  if(!navigator.vibrate) return;
+  if(type==='tap') navigator.vibrate(30);
+  else if(type==='ok') navigator.vibrate([50,30,50]);
+  else if(type==='del') navigator.vibrate(20);
+}
 
 /* ── CLOCK ── */
 function tick(){
@@ -1181,31 +1972,54 @@ function tick(){
   const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   document.getElementById('clockDate').textContent=dias[n.getDay()]+' '+n.getDate()+' '+meses[n.getMonth()]+' '+n.getFullYear();
+  // auto dark mode check
+  if(S.darkForced===null) applyAutoDark();
 }
 tick(); setInterval(tick,30000);
 
-/* ── NAVIGATION ── */
-function go(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+/* ── NAVIGATION (M4) ── */
+function go(id, dir='forward'){
+  trackScreen('screen-'+id);
+  resetInactivity();
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.remove('active','slide-fwd','slide-bck');
+  });
   const el=document.getElementById('screen-'+id);
-  if(el){el.classList.add('active');el.scrollTop=0;}
+  if(el){
+    el.classList.add('active', dir==='back'?'slide-bck':'slide-fwd');
+    el.scrollTop=0;
+  }
   if(id==='ct-sync') runSync();
   if(id==='ct-scores') buildScoreGrid();
   if(id==='carrusel') startCarrusel();
   else stopCarrusel();
+  if(id==='dashboard') {initDashLive(); document.getElementById('wis-fab').classList.add('visible');}
+  else document.getElementById('wis-fab').classList.remove('visible');
+  // show notif bell only for logged-in socios
+  const bellScreens=['socio-perfil','secretaria','gf-tipo','gf-torneo','gf-practica','gf-tee','gf-pago','estado-cuenta','pagar-cuota'];
+  document.getElementById('notifBell').style.display=(S.socio&&bellScreens.includes(id))?'flex':'none';
+  // show cancha change btn
+  document.getElementById('canchaChangeBtn').style.display=(id!=='cancha'&&id!=='carrusel')?'inline-block':'none';
+  // update analytics UI if sistema tab active
+  updateAnalyticsUI();
 }
 
 /* ── DNI KEYPADS ── */
 function kp(mode,v){
+  haptic(v==='ok'?'ok':v==='del'?'del':'tap');
   const key=mode==='dni'?'dni':'ctDni';
   const el=document.getElementById(mode==='dni'?'dniText':'ctDniText');
   if(v==='del'){S[key]=S[key].slice(0,-1);}
   else if(v==='ok'){
     if(S[key].length<6) return;
     if(mode==='dni'){
-      const found=SOCIOS.find(s=>s.dni===S[key])||SOCIOS[0];
-      S.socio=found; renderProfile(found); go('socio-perfil');
-    } else { go('ct-scores'); }
+      const found=SOCIOS.find(s=>s.dni===S[key]);
+      if(found){
+        S.socio=found; renderProfile(found); trackCheckin(); go('socio-perfil','forward');
+      } else {
+        trackDniError(); go('onboarding','forward');
+      }
+    } else { go('ct-scores','forward'); }
     return;
   } else if(S[key].length<8){S[key]+=v;}
   el.textContent=S[key];
@@ -1224,13 +2038,37 @@ function renderProfile(s){
   cuotaEl.className='pcs-val '+(s.cuota==='Al día'?'ok':'warn');
   document.getElementById('profileRondas').textContent=s.rondas;
   document.getElementById('cuentaNombre').textContent=s.nombre;
+  // Show weather card
+  const wc=document.getElementById('weatherCardSocio');
+  if(wc&&S.weather) {wc.style.display='block'; updateWeatherCardSocio();}
+  // Build chart
+  buildStatsChart();
+  // Reservas name
+  const rcS=document.getElementById('rcSocio');
+  if(rcS) rcS.textContent=s.nombre;
 }
 
-function openGolfistics(){window.open('https://www.mardelplatagolf.com/golf/index2.php','_blank');}
+function openGolfistics(){
+  document.getElementById('golfIframe').src='https://www.mardelplatagolf.com/golf/login.php';
+  document.getElementById('golfOverlay').classList.add('open');
+}
+
+/* ── CANCHA (M10) ── */
+function selectCancha(cancha){
+  S.cancha=cancha;
+  const cfg = cancha==='vieja'
+    ? {label:'Cancha Vieja · Playa Grande',par:'70/72',slope:113,bocas:[1,4,7,10,13,16],torneo:'Copa 2 de Abril'}
+    : {label:'Cancha Nueva · Mario Bravo',par:'71/73',slope:118,bocas:[1,4,7,10,13,16,18],torneo:'Copa Otoño 2026'};
+  S.canchaConfig=cfg;
+  document.getElementById('hdrSub').textContent='Club Manager Pro · '+cfg.label.split('·')[0].trim();
+  document.getElementById('canchaChangeBtn').style.display='inline-block';
+  go('home','forward');
+}
 
 /* ── GREEN FEE ── */
 function buildSalidaGrid(gridId,btnId,next){
-  const bocas=[1,4,7,10,13,16];
+  const cfg=S.canchaConfig||{bocas:[1,4,7,10,13,16],slope:113};
+  const bocas=cfg.bocas;
   const hcp=S.socio?S.socio.hcp:12.4;
   const slopes={1:113,4:108,7:118,10:110,13:105,16:115};
   const g=document.getElementById(gridId);
@@ -1272,8 +2110,8 @@ function gfSetTipo(isTorneo,btn){
   btn.closest('.cg').querySelectorAll('.cb').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
   setTimeout(()=>{
-    if(isTorneo){buildSalidaGrid('salidaGrid','btnTorneoOk','gf-pago');go('gf-torneo');}
-    else go('gf-practica');
+    if(isTorneo){buildSalidaGrid('salidaGrid','btnTorneoOk','gf-pago');go('gf-torneo','forward');}
+    else go('gf-practica','forward');
   },200);
 }
 
@@ -1285,8 +2123,9 @@ function pracSetTarjeta(v,btn){
 }
 
 function pracContinuar(){
-  if(S.gfPracTarjeta){buildSalidaGrid('salidaGridPrac','btnTeeOk','gf-pago');go('gf-tee');}
-  else{updateGfPago(1,113);go('gf-pago');}
+  const slope=(S.canchaConfig||{slope:113}).slope;
+  if(S.gfPracTarjeta){buildSalidaGrid('salidaGridPrac','btnTeeOk','gf-pago');go('gf-tee','forward');}
+  else{updateGfPago(1,slope);go('gf-pago','forward');}
 }
 
 /* ── INVITADO FLOW ── */
@@ -1352,20 +2191,17 @@ function invShowStep(){
 }
 
 function invKp(v){
+  haptic(v==='ok'?'ok':v==='del'?'del':'tap');
   const step=INV_STEPS[S.invStep];
   if(v==='ok'){
-    // check DNI against DB
     if(step.key==='dni'){
       const found=INVITADOS_DB.find(x=>x.dni===S.invData.dni);
       if(found){
         S.socio={...found,hcp:20,cuota:'Al día',rondas:0};
-        renderProfile(S.socio);
-        go('socio-perfil');
-        return;
+        renderProfile(S.socio); go('socio-perfil','forward'); return;
       }
     }
-    invNext();
-    return;
+    invNext(); return;
   }
   if(v==='del'){S.invData[step.key]=(S.invData[step.key]||'').slice(0,-1);}
   else if((S.invData[step.key]||'').length<12){S.invData[step.key]=(S.invData[step.key]||'')+v;}
@@ -1381,10 +2217,34 @@ function invNext(){
     document.getElementById('invPagoSub').textContent=(S.invData.nombre||'Invitado')+' · '+hoyos.split('·')[0].trim();
     document.getElementById('invSuccessDetail').innerHTML=(S.invData.nombre||'Invitado')+' registrado<br>Pago acreditado · Tarjeta impresa';
     S.invStep=0;
-    go('invitado-pago');
+    // M13: show pase first
+    showPaseInvitado();
+    go('invitado-pase','forward');
     return;
   }
   invShowStep();
+}
+
+/* ── M13 PASE INVITADO ── */
+function showPaseInvitado(){
+  const nombre=S.invData.nombre||'Invitado';
+  const club=S.invData.club||'Sin club registrado';
+  const now=new Date();
+  const fecha=now.getDate()+'/'+(now.getMonth()+1)+'/'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const numDia=Math.floor(Math.random()*20)+1;
+  document.getElementById('paseNumero').textContent='#'+String(numDia).padStart(3,'0');
+  document.getElementById('paseNombre').textContent=nombre;
+  document.getElementById('paseClub').textContent=club;
+  document.getElementById('paseCancha').textContent=S.canchaConfig?S.canchaConfig.label.split('·')[0].trim():'Cancha Vieja';
+  document.getElementById('paseFecha').textContent=fecha;
+  const qrData=encodeURIComponent('PASE|'+nombre+'|'+fecha+'|'+numDia);
+  document.getElementById('paseQr').src='https://api.qrserver.com/v1/create-qr-code/?size=100x100&data='+qrData;
+}
+function compartirPase(){
+  const nombre=S.invData.nombre||'Invitado';
+  const txt='Pase de invitado — '+nombre+' — Mar del Plata Golf Club';
+  if(navigator.share){navigator.share({title:'Pase de Invitado',text:txt});}
+  else{navigator.clipboard?.writeText(txt);alert('Pase copiado al portapapeles');}
 }
 
 /* ── SCORE GRID ── */
@@ -1457,6 +2317,7 @@ function openMk(half,idx,hole,current){
   document.getElementById('mkOverlay').classList.add('open');
 }
 function mkPress(v){
+  haptic('tap');
   if(S.mkVal.length>=2) S.mkVal='';
   S.mkVal+=v;
   document.getElementById('mkDisplay').textContent=S.mkVal;
@@ -1480,7 +2341,7 @@ function runSync(){
   });
   ['ss1','ss2','ss3','ss4','ss5'].forEach((id,i)=>{
     setTimeout(()=>{ const el=document.getElementById(id); el.classList.add('active'); },i*800);
-    setTimeout(()=>{ const el=document.getElementById(id); el.classList.remove('active'); el.classList.add('done'); el.querySelector('.sync-ck').textContent='✓'; if(i===4) setTimeout(()=>go('ct-success'),600); },i*800+700);
+    setTimeout(()=>{ const el=document.getElementById(id); el.classList.remove('active'); el.classList.add('done'); el.querySelector('.sync-ck').textContent='✓'; if(i===4) setTimeout(()=>go('ct-success','forward'),600); },i*800+700);
   });
 }
 
@@ -1504,6 +2365,81 @@ function dashTab(idx,btn){
   document.querySelectorAll('.dash-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('dtab'+idx).classList.add('active');
+  if(idx===3) updateAnalyticsUI();
+  if(idx===6) buildLeaderboard('todos');
+}
+
+/* ── M6 LIVE ALERTS ── */
+function toggleAlert(el){el.classList.toggle('resolved');}
+function nuevaAlerta(){
+  const txt=prompt('Escribí el texto de la nueva alerta:');
+  if(!txt) return;
+  const container=document.getElementById('alertasContainer');
+  const d=document.createElement('div');
+  d.className='alert-row';
+  d.style.marginTop='8px';
+  d.style.cursor='pointer';
+  d.onclick=()=>toggleAlert(d);
+  d.innerHTML='<div class="alert-dot"></div>'+txt;
+  container.appendChild(d);
+}
+
+/* ── M6 DASHBOARD LIVE ── */
+function initDashLive(){
+  if(S.dashLiveTimer) return;
+  S.dashCountdownSec=60;
+  S.dashLiveTimer=setInterval(()=>{
+    S.dashCountdownSec--;
+    const el=document.getElementById('dashCountdown');
+    if(el) el.textContent=S.dashCountdownSec+'s';
+    if(S.dashCountdownSec<=0){
+      S.dashCountdownSec=60;
+      // Simulate live data change
+      document.querySelectorAll('#dtab0 .dm-val').forEach(v=>{
+        const num=parseInt(v.textContent);
+        if(!isNaN(num)&&num>0){
+          const delta=Math.floor(Math.random()*5)-2;
+          v.textContent=Math.max(0,num+delta);
+        }
+      });
+    }
+  },1000);
+}
+
+/* ── M11 LEADERBOARD ── */
+function buildLeaderboard(filterCat){
+  const data=filterCat==='todos'?LB_DATA:LB_DATA.filter(p=>p.cat===filterCat);
+  const sorted=[...data].sort((a,b)=>a.neto-b.neto);
+  const leaders={A:sorted.find(p=>p.cat==='A'),B:sorted.find(p=>p.cat==='B'),C:sorted.find(p=>p.cat==='C')};
+  const min=sorted[0]?.neto||999;
+  const body=document.getElementById('lbBody');
+  body.innerHTML='';
+  sorted.forEach((p,i)=>{
+    const isLeader=leaders[p.cat]===p;
+    const diff=p.neto-min;
+    const tr=document.createElement('tr');
+    if(isLeader) tr.className='leader';
+    tr.innerHTML=`<td class="lb-pos ${i<3?'gold':''}">${i+1}°</td>
+      <td class="lb-nombre">${p.nombre}</td>
+      <td><span class="lb-cat">${p.cat}</span></td>
+      <td>${p.bruto}</td><td>${p.hcp}</td>
+      <td style="font-weight:600">${p.neto}</td>
+      <td style="color:rgba(255,255,255,.4)">${diff===0?'—':'+'+diff}</td>`;
+    body.appendChild(tr);
+  });
+  const tn=document.getElementById('lbTorneoNombre');
+  if(tn) tn.textContent=S.canchaConfig?.torneo||'Copa 2 de Abril';
+}
+function lbFilter(cat,btn){
+  document.querySelectorAll('.lb-filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildLeaderboard(cat);
+}
+function lbRefresh(){
+  const icon=document.getElementById('lbRefreshIcon');
+  icon.className='lb-spin';
+  icon.textContent='↻';
+  setTimeout(()=>{icon.className='';buildLeaderboard('todos');},800);
 }
 
 /* ── AI CHAT (OpenAI) ── */
@@ -1610,6 +2546,7 @@ function openHistoria(){document.getElementById('historiaModal').classList.add('
 /* ── MÁS ACCIONES ── */
 function showMas(tipo){
   S.masType = tipo;
+  trackPayment();
   const sub = tipo === 'invitado'
     ? 'Podés volver a tu panel de invitado para otra gestión, o finalizar.'
     : 'Podés volver a tu panel para realizar otra gestión, o finalizar tu sesión.';
@@ -1619,10 +2556,12 @@ function showMas(tipo){
 function masResponder(continuar){
   document.getElementById('masOverlay').classList.remove('open');
   if(continuar){
-    if(S.masType === 'invitado') go('invitado');
-    else go('socio-perfil');
+    if(S.masType === 'invitado') go('invitado','back');
+    else go('socio-perfil','back');
   } else {
-    go('home');
+    S.socio=null;
+    document.getElementById('notifBell').style.display='none';
+    go('home','back');
   }
 }
 
@@ -1644,14 +2583,493 @@ function showQr(nombre, monto, concepto){
 function closeQr(){document.getElementById('qrOverlay').classList.remove('open');}
 
 /* ── GOLFISTICS IFRAME ── */
-function openGolfistics(){
-  document.getElementById('golfIframe').src='https://www.mardelplatagolf.com/golf/login.php';
-  document.getElementById('golfOverlay').classList.add('open');
-}
 function closeGolfistics(){
   document.getElementById('golfOverlay').classList.remove('open');
   document.getElementById('golfIframe').src='';
 }
+
+/* ══ M1 SPLASH SCREEN ══ */
+function initSplash(){
+  const splash=document.getElementById('splash-screen');
+  const bar=document.getElementById('splashBar');
+  setTimeout(()=>{ bar.style.width='100%'; },50);
+  setTimeout(()=>{
+    splash.classList.add('hidden');
+    setTimeout(()=>{ splash.style.display='none'; go('cancha','forward'); },600);
+  },2500);
+}
+
+/* ══ M7 DARK MODE ══ */
+function applyAutoDark(){
+  if(S.darkForced!==null) return;
+  const h=new Date().getHours();
+  const shouldBeDark=h>=19||h<7;
+  document.body.classList.toggle('dark-mode',shouldBeDark);
+  document.getElementById('dmToggle').textContent=shouldBeDark?'☀️':'🌙';
+}
+function toggleDarkMode(){
+  const isDark=document.body.classList.toggle('dark-mode');
+  document.getElementById('dmToggle').textContent=isDark?'☀️':'🌙';
+  S.darkForced=isDark;
+  localStorage.setItem('dm_forced',isDark?'1':'0');
+}
+// Restore forced preference
+(function(){
+  const f=localStorage.getItem('dm_forced');
+  if(f!==null){S.darkForced=f==='1';document.body.classList.toggle('dark-mode',S.darkForced);document.getElementById('dmToggle').textContent=S.darkForced?'☀️':'🌙';}
+  else applyAutoDark();
+})();
+
+/* ══ M9 SCREENSAVER ══ */
+let _ssWarningTimer=null,_ssCloseTimer=null;
+function resetInactivity(){
+  clearTimeout(S.inactivityTimer);
+  clearTimeout(_ssWarningTimer);
+  clearTimeout(_ssCloseTimer);
+  const sso=document.getElementById('screensaver-overlay');
+  sso.classList.remove('open');
+  S.ssCounter=60;
+  // 2min → warning
+  S.inactivityTimer=setTimeout(()=>{
+    sso.classList.add('open');
+    const cEl=document.getElementById('ssCounter');
+    S.ssCounter=60;
+    const tick=setInterval(()=>{
+      S.ssCounter--;
+      if(cEl) cEl.textContent=S.ssCounter;
+      if(S.ssCounter<=0){clearInterval(tick);sso.classList.remove('open');S.socio=null;go('home','back');}
+    },1000);
+    _ssCloseTimer=setTimeout(()=>clearInterval(tick),65000);
+  },120000);
+}
+['click','touchstart','mousemove','keydown'].forEach(e=>{
+  document.addEventListener(e,resetInactivity,{passive:true});
+});
+
+/* ══ M2 ADMIN PIN ══ */
+// Triple click on header escudo
+(function(){
+  const esc=document.getElementById('hdrEscudo');
+  if(!esc) return;
+  esc.addEventListener('click',()=>{
+    S.adminClickCount++;
+    clearTimeout(S.adminClickTimer);
+    if(S.adminClickCount>=3){
+      S.adminClickCount=0;
+      openAdmin();
+    } else {
+      S.adminClickTimer=setTimeout(()=>{S.adminClickCount=0;},600);
+    }
+  });
+})();
+
+function openAdmin(){
+  S.adminPin='';
+  S.adminUnlocked=false;
+  document.getElementById('adminPinDisplay').textContent='• • • •';
+  document.getElementById('adminErr').textContent='';
+  document.getElementById('admin-pin-section').style.display='block';
+  document.getElementById('admin-panel-section').classList.remove('open');
+  document.getElementById('admin-overlay').classList.add('open');
+}
+function closeAdmin(){document.getElementById('admin-overlay').classList.remove('open');}
+function adminPin(v){
+  haptic(v==='ok'?'ok':v==='del'?'del':'tap');
+  if(v==='del'){S.adminPin=S.adminPin.slice(0,-1);}
+  else if(v==='ok'){
+    if(S.adminPin==='1234'){
+      document.getElementById('admin-pin-section').style.display='none';
+      document.getElementById('admin-panel-section').classList.add('open');
+      // Load saved values
+      const t=localStorage.getItem('admin_torneo')||'Copa 2 de Abril';
+      const p=localStorage.getItem('admin_gf_precio')||'$15.000';
+      const b=localStorage.getItem('admin_bienvenida')||'';
+      document.getElementById('adminTorneo').value=t;
+      document.getElementById('adminPrecioGF').value=p;
+      document.getElementById('adminBienvenida').value=b;
+    } else {
+      document.getElementById('adminErr').textContent='PIN incorrecto. Intentá de nuevo.';
+      S.adminPin='';
+      document.getElementById('adminPinDisplay').textContent='• • • •';
+    }
+    return;
+  } else if(S.adminPin.length<4){S.adminPin+=v;}
+  document.getElementById('adminPinDisplay').textContent=S.adminPin.replace(/./g,'•')||'• • • •';
+  document.getElementById('adminErr').textContent='';
+}
+function adminTab(idx,btn){
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.admin-tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('atab'+idx).classList.add('active');
+}
+function adminGuardar(){
+  const torneo=document.getElementById('adminTorneo').value||'Copa 2 de Abril';
+  const precio=document.getElementById('adminPrecioGF').value||'$15.000';
+  const msg=document.getElementById('adminBienvenida').value;
+  localStorage.setItem('admin_torneo',torneo);
+  localStorage.setItem('admin_gf_precio',precio);
+  localStorage.setItem('admin_bienvenida',msg);
+  // Apply changes
+  if(msg){
+    const bienEl=document.getElementById('homeBienvenida');
+    if(bienEl){bienEl.textContent=msg;bienEl.style.display='block';}
+  }
+  // Update gf amount
+  const gfA=document.getElementById('gfAmount');
+  if(gfA) gfA.textContent=precio;
+  alert('Cambios guardados exitosamente.');
+}
+
+/* ── M17 BÚSQUEDA SOCIOS ── */
+function adminSearch(q){
+  const results=document.getElementById('adminSearchResults');
+  if(!q.trim()){results.innerHTML='';return;}
+  const found=SOCIOS.filter(s=>s.nombre.toLowerCase().includes(q.toLowerCase())||s.matricula.includes(q));
+  if(!found.length){results.innerHTML='<div style="font-size:12px;color:var(--muted);padding:10px">Sin resultados</div>';return;}
+  results.innerHTML='';
+  found.forEach(s=>{
+    const d=document.createElement('div');
+    d.className='admin-search-result';
+    d.innerHTML=`<div class="asr-name">${s.nombre}</div><div class="asr-detail">Mat. #${s.matricula} · HCP ${s.hcp} · Cuota: ${s.cuota}</div>`;
+    d.onclick=()=>{
+      closeAdmin();
+      S.socio=s; renderProfile(s); go('socio-perfil','forward');
+    };
+    results.appendChild(d);
+  });
+}
+
+/* ══ M12 CREDENCIAL DIGITAL ══ */
+function openCredencial(){
+  if(!S.socio) return;
+  const s=S.socio;
+  document.getElementById('credNombre').textContent=s.nombre;
+  document.getElementById('credMatricula').textContent='MATRÍCULA · #'+s.matricula;
+  document.getElementById('credHcp').textContent=s.hcp;
+  document.getElementById('credRondas').textContent=s.rondas;
+  const qd=encodeURIComponent('MDPGC-SOCIO|'+s.nombre+'|'+s.matricula+'|'+s.hcp+'|2026');
+  document.getElementById('credQrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+qd;
+  document.getElementById('credencial-modal').classList.add('open');
+}
+function closeCredencial(){document.getElementById('credencial-modal').classList.remove('open');}
+function compartirCredencial(){
+  const s=S.socio;
+  const txt='Credencial Digital\n'+s.nombre+'\nMatrícula #'+s.matricula+'\nHCP '+s.hcp+'\nMar del Plata Golf Club';
+  if(navigator.share){navigator.share({title:'Credencial MDPGC',text:txt});}
+  else{navigator.clipboard?.writeText(txt);alert('Credencial copiada al portapapeles');}
+}
+
+/* ══ M15 NOTIFICACIONES ══ */
+function openNotif(){
+  document.getElementById('notif-panel').classList.add('open');
+  document.getElementById('notif-overlay').classList.add('open');
+}
+function closeNotif(){
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('notif-overlay').classList.remove('open');
+}
+function markNotifRead(el){
+  el.classList.add('read');
+  updateNotifBadge();
+}
+function updateNotifBadge(){
+  const unread=document.querySelectorAll('#notifList .notif-item:not(.read)').length;
+  const badge=document.getElementById('notifBadge');
+  if(badge){
+    badge.textContent=unread;
+    badge.style.display=unread>0?'flex':'none';
+  }
+}
+
+/* ══ M16 CLIMA ══ */
+const WEATHER_CODES={0:'Soleado',1:'Mayormente soleado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',48:'Niebla helada',51:'Llovizna',53:'Llovizna moderada',61:'Lluvia leve',63:'Lluvia moderada',65:'Lluvia fuerte',71:'Nevada leve',80:'Lluvia',81:'Lluvia moderada',95:'Tormenta',99:'Tormenta fuerte'};
+function getWeatherIcon(code){
+  if(code===0) return '☀️';
+  if(code<=3) return '⛅';
+  if(code<=48) return '🌫️';
+  if(code<=67) return '🌧️';
+  if(code<=77) return '❄️';
+  if(code<=82) return '🌦️';
+  return '⛈️';
+}
+function getWeatherText(code){
+  return WEATHER_CODES[code]||WEATHER_CODES[Math.floor(code/10)*10]||'Variable';
+}
+async function fetchWeather(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-38.0023&longitude=-57.5575&current=temperature_2m,wind_speed_10m,weather_code&timezone=America/Argentina/Buenos_Aires');
+    const d=await r.json();
+    S.weather={temp:Math.round(d.current.temperature_2m),wind:Math.round(d.current.wind_speed_10m),code:d.current.weather_code};
+    updateWeatherUI();
+  }catch(e){console.log('Weather unavailable');}
+}
+function updateWeatherUI(){
+  if(!S.weather) return;
+  const {temp,wind,code}=S.weather;
+  const icon=getWeatherIcon(code);
+  const el=id=>document.getElementById(id);
+  if(el('wtIcon')) el('wtIcon').textContent=icon;
+  if(el('wtTemp')) el('wtTemp').textContent=temp+'°';
+}
+function updateWeatherCardSocio(){
+  if(!S.weather) return;
+  const {temp,wind,code}=S.weather;
+  const wc=document.getElementById('weatherCardSocio');
+  if(!wc) return;
+  wc.style.display='block';
+  const icon=getWeatherIcon(code);
+  const txt=getWeatherText(code);
+  document.getElementById('wcIconBig').textContent=icon;
+  document.getElementById('wcTempBig').textContent=temp+'°C';
+  document.getElementById('wcDetail').textContent=txt+' · Viento '+wind+' km/h';
+  let msg='';
+  if(wind>30) msg='Viento fuerte — considerá tee de salida alternativo';
+  else if(code>=60&&code<80) msg='Lluvia — verificá el estado de la cancha';
+  else msg='Buenas condiciones para jugar ⛳';
+  document.getElementById('wcMsg').textContent=msg;
+}
+fetchWeather();
+setInterval(fetchWeather,600000);
+
+/* ══ M14 ESTADÍSTICAS ══ */
+function toggleStats(){
+  const toggle=document.getElementById('statsToggle');
+  const body=document.getElementById('statsBody');
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+  if(body.classList.contains('open')) buildStatsChart();
+}
+function buildStatsChart(){
+  const chart=document.getElementById('statsChart');
+  if(!chart) return;
+  const scores=[82,79,85,81,88,79,83,80];
+  const max=Math.max(...scores), min=Math.min(...scores);
+  chart.innerHTML='';
+  scores.forEach(s=>{
+    const col=document.createElement('div');
+    col.className='chart-bar-col';
+    const h=Math.round(((max-s+5)/(max-min+10))*60);
+    col.innerHTML=`<div class="chart-bar" style="height:${h}px"></div><div class="chart-bar-num">${s}</div>`;
+    chart.appendChild(col);
+  });
+}
+
+/* ══ M5 IMPRESIÓN ══ */
+function imprimirGreenFee(){
+  const s=S.socio||{nombre:'Socio'};
+  const hcp=document.getElementById('hcpResult')?.textContent||'—';
+  const boca=S.gfSalida||1;
+  const precio=document.getElementById('gfAmount')?.textContent||'—';
+  const formato=S.gfTorneo?'Medal Play':'Práctica';
+  const now=new Date();
+  const fecha=now.toLocaleDateString('es-AR')+' '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const num=now.getFullYear().toString().slice(2)+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*9999)).padStart(4,'0');
+  document.getElementById('pt-socio').textContent=s.nombre;
+  document.getElementById('pt-fecha').textContent=fecha;
+  document.getElementById('pt-boca').textContent='Boca '+boca;
+  document.getElementById('pt-hcp').textContent=hcp;
+  document.getElementById('pt-formato').textContent=formato;
+  document.getElementById('pt-precio').textContent=precio;
+  document.getElementById('pt-numero').textContent=num;
+  // Simulated barcode
+  const bc=document.getElementById('pt-barcode');
+  bc.innerHTML='';
+  for(let i=0;i<30;i++){
+    const b=document.createElement('div');
+    b.className='pt-bar';
+    b.style.width=(Math.random()>0.5?3:1.5)+'px';
+    bc.appendChild(b);
+  }
+  window.print();
+}
+
+/* ══ M18 PDF DESCARGABLE ══ */
+function descargarPDF(tipo){
+  const s=S.socio||{nombre:'Visitante',matricula:'—'};
+  const now=new Date();
+  const fecha=now.toLocaleDateString('es-AR')+' '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const num=now.getFullYear().toString().slice(2)+String(Math.floor(Math.random()*9999)).padStart(4,'0');
+  const concepto=tipo==='green-fee'?'Green Fee':(tipo==='cuota'?'Cuota mensual':'Arancel de visita');
+  const monto=tipo==='green-fee'?(document.getElementById('gfAmount')?.textContent||'$15.000'):(tipo==='cuota'?'$85.000':'$12.000');
+  const html=`<html><head><title>Comprobante</title><style>
+    body{font-family:monospace;max-width:400px;margin:20px auto;padding:20px;font-size:12px;}
+    .c{text-align:center;}.b{font-weight:700;}.big{font-size:16px;}.div{border-top:1px dashed #000;margin:8px 0;}
+    .row{display:flex;justify-content:space-between;margin:4px 0;}
+    .bar{display:flex;justify-content:center;gap:2px;margin:10px 0;}
+    .bbar{background:#000;height:30px;display:inline-block;}
+  </style></head><body>
+  <div class="c b big">MAR DEL PLATA GOLF CLUB</div>
+  <div class="c">Club Manager Pro · Comprobante de pago</div>
+  <div class="div"></div>
+  <div class="row"><span>Nombre:</span><span class="b">${s.nombre}</span></div>
+  <div class="row"><span>Concepto:</span><span>${concepto}</span></div>
+  <div class="row"><span>Monto:</span><span class="b">${monto}</span></div>
+  <div class="row"><span>Fecha:</span><span>${fecha}</span></div>
+  <div class="row"><span>Comprobante N°:</span><span>${num}</span></div>
+  <div class="div"></div>
+  <div class="bar">${Array.from({length:25},()=>`<div class="bbar" style="width:${Math.random()>0.5?3:1.5}px"></div>`).join('')}</div>
+  <div class="div"></div>
+  <div class="c" style="font-size:10px">Club Manager Pro · WIS Agency · wisagency.com</div>
+  <script>window.print();setTimeout(()=>window.close(),1000);</scr`+'ipt></body></html>';
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+
+/* ══ M19 RESERVAS ══ */
+function buildReservas(){
+  const container=document.getElementById('resDates');
+  container.innerHTML='';
+  const dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const today=new Date();
+  for(let i=0;i<7;i++){
+    const d=new Date(today);
+    d.setDate(d.getDate()+i);
+    const btn=document.createElement('div');
+    btn.className='res-date-btn';
+    btn.innerHTML=`<div class="res-date-day">${dias[d.getDay()]}</div><div class="res-date-num">${d.getDate()}</div><div class="res-date-day">${meses[d.getMonth()]}</div>`;
+    btn.onclick=()=>{
+      document.querySelectorAll('.res-date-btn').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      const label=dias[d.getDay()]+' '+d.getDate()+' '+meses[d.getMonth()];
+      S.resSelectedDate=label;
+      buildTimePicker();
+      document.getElementById('resTimeLbl').style.display='block';
+      document.getElementById('rcFecha').textContent=label;
+    };
+    container.appendChild(btn);
+  }
+}
+function buildTimePicker(){
+  const grid=document.getElementById('resTimeGrid');
+  grid.innerHTML='';
+  const takenSlots=[0,2,5,8,12,15,18,22,26,29];
+  for(let h=7;h<=17;h++){
+    for(let m=0;m<60;m+=15){
+      if(h===17&&m>0) break;
+      const idx=(h-7)*4+Math.floor(m/15);
+      const taken=takenSlots.includes(idx);
+      const label=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+      const btn=document.createElement('div');
+      btn.className='res-time-btn'+(taken?' taken':'');
+      btn.textContent=label;
+      if(!taken){
+        btn.onclick=()=>{
+          document.querySelectorAll('.res-time-btn:not(.taken)').forEach(b=>b.classList.remove('sel'));
+          btn.classList.add('sel');
+          S.resSelectedHora=label;
+          document.getElementById('btnReservaOk').disabled=false;
+          document.getElementById('rcHora').textContent=label;
+          document.getElementById('rcCancha').textContent=S.canchaConfig?.label.split('·')[0].trim()||'Cancha Vieja';
+        };
+      }
+      grid.appendChild(btn);
+    }
+  }
+}
+
+/* ══ M22 ONBOARDING ══ */
+function submitOnboarding(){
+  const nombre=document.getElementById('ob-nombre')?.value.trim();
+  if(!nombre){alert('Por favor ingresá tu nombre completo.');return;}
+  alert('¡Gracias '+nombre+'!\n\nTu solicitud fue enviada a secretaría.\nTe contactaremos en 24 hs para completar tu alta.\n\nSecretaría: (0223) 451-2300');
+  go('home','back');
+}
+
+/* ══ M23 MAPA SVG ══ */
+function openMapa(){
+  const label=S.canchaConfig?.label||'Cancha Vieja';
+  document.getElementById('mapaCanchaLabel').textContent=label.split('·')[0].trim();
+  buildMapaBocas();
+  document.getElementById('mapa-overlay').classList.add('open');
+}
+function closeMapa(){document.getElementById('mapa-overlay').classList.remove('open');}
+function buildMapaBocas(){
+  const svg=document.getElementById('mapaSvg');
+  let g=document.getElementById('mapa-bocas');
+  g.innerHTML='';
+  const cfg=S.canchaConfig||{bocas:[1,4,7,10,13,16]};
+  const positions={1:[75,55],4:[178,35],7:[298,50],10:[345,135],13:[325,245],16:[195,285],18:[100,270]};
+  cfg.bocas.forEach(b=>{
+    const pos=positions[b];
+    if(!pos) return;
+    const isSelected=b===S.gfSalida;
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',pos[0]);circle.setAttribute('cy',pos[1]);
+    circle.setAttribute('r','12');
+    circle.setAttribute('fill',isSelected?'#5bbf6e':'rgba(196,168,98,.7)');
+    circle.setAttribute('stroke',isSelected?'#fff':'rgba(196,168,98,.3)');
+    circle.setAttribute('stroke-width','1.5');
+    circle.style.cursor='pointer';
+    circle.onclick=()=>{
+      S.gfSalida=b;
+      buildMapaBocas();
+    };
+    const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x',pos[0]);text.setAttribute('y',pos[1]+4);
+    text.setAttribute('text-anchor','middle');text.setAttribute('fill',isSelected?'#0d1f14':'#0d1f14');
+    text.setAttribute('font-size','9');text.setAttribute('font-family','Cinzel');text.setAttribute('font-weight','600');
+    text.textContent=b;
+    g.appendChild(circle);g.appendChild(text);
+  });
+}
+
+/* ══ M24 WIS SUPPORT CHAT ══ */
+const WIS_CONTEXT=`Eres el asistente de soporte técnico de WIS Agency para Club Manager Pro. Ayudás a los administradores del club a: resolver problemas técnicos del tótem, entender los reportes del dashboard, configurar el sistema, y responder preguntas sobre funcionalidades. Conocés el sistema perfectamente. Respondés en español, de forma concisa y profesional. Si el problema requiere intervención técnica de WIS, pedís el email del contacto y decís que un técnico se comunicará en menos de 2 horas.`;
+function toggleWisChat(){
+  const panel=document.getElementById('wis-chat-panel');
+  panel.classList.toggle('open');
+}
+async function sendWisMsg(){
+  const input=document.getElementById('wisInput');
+  const msg=input.value.trim();
+  if(!msg) return;
+  input.value='';
+  addWisMsg(msg,'user');
+  addWisMsg('...','bot','wloading');
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+OPENAI_API_KEY},
+      body:JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:WIS_CONTEXT},{role:'user',content:msg}],max_tokens:250})
+    });
+    const d=await r.json();
+    const reply=d.choices?.[0]?.message?.content||'Error al consultar.';
+    document.getElementById('wloading')?.remove();
+    addWisMsg(reply,'bot');
+  }catch(e){document.getElementById('wloading')?.remove();addWisMsg('Error de conexión. Verificá la API key.','bot');}
+}
+function addWisMsg(text,role,id){
+  const c=document.getElementById('wisMsgs');
+  const d=document.createElement('div');
+  d.className='wis-msg '+role;
+  d.textContent=text;
+  if(id) d.id=id;
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+}
+
+/* ══ M20 MODO QUIOSCO ══ */
+let _escCount=0,_escTimer=null;
+function activarKiosk(){
+  closeAdmin();
+  document.documentElement.requestFullscreen?.().catch(()=>{});
+  document.body.classList.add('kiosk-mode');
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  alert('Modo tótem activado. Para salir: presioná ESC tres veces seguidas.');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    _escCount++;
+    clearTimeout(_escTimer);
+    _escTimer=setTimeout(()=>{_escCount=0;},1500);
+    if(_escCount>=3){
+      _escCount=0;
+      document.exitFullscreen?.();
+      document.body.classList.remove('kiosk-mode');
+    }
+  }
+});
 
 /* ── INIT ── */
 document.getElementById('screen-invitado').addEventListener('animationstart',()=>{
@@ -1660,6 +3078,18 @@ document.getElementById('screen-invitado').addEventListener('animationstart',()=
 });
 document.getElementById('screen-socio-dni').addEventListener('animationstart',()=>{S.dni='';document.getElementById('dniText').textContent='';});
 document.getElementById('screen-ct-dni').addEventListener('animationstart',()=>{S.ctDni='';document.getElementById('ctDniText').textContent='';});
+document.getElementById('screen-reservas').addEventListener('animationstart',()=>{buildReservas();});
+
+// Load admin saved values on start
+(function(){
+  const msg=localStorage.getItem('admin_bienvenida');
+  if(msg){const el=document.getElementById('homeBienvenida');if(el){el.textContent=msg;el.style.display='block';}}
+  const precio=localStorage.getItem('admin_gf_precio');
+  if(precio){const el=document.getElementById('gfAmount');if(el)el.textContent=precio;}
+  resetInactivity();
+  initSplash();
+  updateAnalyticsUI();
+})();
 </script>
 
 <!-- ══════════════════════════════════════ MÁS ACCIONES MODAL -->
